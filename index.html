@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ShadowPoint Button Test</title>
+  <title>ShadowPoint Supabase Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -19,12 +20,20 @@
       max-width: 700px;
       margin: 0 auto;
     }
-    button {
+    input, button {
       width: 100%;
       padding: 14px;
       font-size: 18px;
       margin: 8px 0;
       border-radius: 10px;
+      box-sizing: border-box;
+    }
+    input {
+      background: #0f0f0f;
+      color: #fff;
+      border: 1px solid #333;
+    }
+    button {
       border: none;
       background: gold;
       color: black;
@@ -39,16 +48,101 @@
 </head>
 <body>
   <div class="card">
-    <h1>SHADOWPOINT BUTTON TEST</h1>
+    <h1>SHADOWPOINT SUPABASE TEST</h1>
     <p id="top">START</p>
 
-    <button onclick="alert('BUTTON CLICKED'); document.getElementById('msg').innerText='Button works';">Tap Me</button>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="testSupabase()">Test Supabase Load</button>
+    <button onclick="doLogin()">Sign In</button>
+    <button onclick="checkSession()">Check Session</button>
 
     <div id="msg">Waiting.</div>
   </div>
 
   <script>
     document.getElementById('top').innerText = 'SCRIPT RAN';
+
+    var SUPABASE_URL = 'https://hulcxftmoazrvkjqqyuk.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T';
+    var client = null;
+
+    function testSupabase() {
+      var msg = document.getElementById('msg');
+
+      if (!window.supabase) {
+        msg.innerText = 'window.supabase is missing';
+        return;
+      }
+
+      try {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        msg.innerText = 'Supabase client created successfully';
+      } catch (e) {
+        msg.innerText = 'Supabase createClient failed: ' + e.message;
+      }
+    }
+
+    async function doLogin() {
+      var msg = document.getElementById('msg');
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+
+      if (!client) {
+        msg.innerText = 'Create the Supabase client first by tapping Test Supabase Load';
+        return;
+      }
+
+      if (!email || !password) {
+        msg.innerText = 'Enter email and password';
+        return;
+      }
+
+      msg.innerText = 'Trying login...';
+
+      try {
+        var result = await client.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (result.error) {
+          msg.innerText = 'LOGIN FAILED: ' + result.error.message;
+          return;
+        }
+
+        msg.innerText = 'LOGIN SUCCESS';
+      } catch (e) {
+        msg.innerText = 'LOGIN CRASH: ' + e.message;
+      }
+    }
+
+    async function checkSession() {
+      var msg = document.getElementById('msg');
+
+      if (!client) {
+        msg.innerText = 'Create the Supabase client first by tapping Test Supabase Load';
+        return;
+      }
+
+      try {
+        var result = await client.auth.getSession();
+
+        if (result.error) {
+          msg.innerText = 'SESSION ERROR: ' + result.error.message;
+          return;
+        }
+
+        if (result.data.session && result.data.session.user) {
+          msg.innerText = 'SIGNED IN AS: ' + result.data.session.user.email;
+        } else {
+          msg.innerText = 'NO ACTIVE SESSION';
+        }
+      } catch (e) {
+        msg.innerText = 'SESSION CRASH: ' + e.message;
+      }
+    }
   </script>
 </body>
 </html>
