@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShadowPoint Case OS Dashboard</title>
+  <meta name="description" content="ShadowPoint Case OS dashboard for bail and recovery operations." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#080b10;
+      --bg2:#0d1219;
+      --panel:rgba(255,255,255,0.04);
+      --panel2:rgba(255,255,255,0.06);
+      --text:#f5f1e6;
+      --muted:#cfc4a2;
+      --gold:#d4af37;
+      --gold2:#f0d77b;
+      --line:rgba(212,175,55,0.26);
+      --danger:#ff7a7a;
+      --ok:#8fd89f;
+      --shadow:0 18px 50px rgba(0,0,0,0.45);
+      --radius:22px;
+      --radius-sm:14px;
+      --max:1300px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top center, rgba(212,175,55,0.08), transparent 28%),
+        linear-gradient(180deg, #0b1017 0%, #090d13 45%, #070a0f 100%);
+      min-height:100vh;
+    }
+    .shell{
+      width:min(calc(100% - 24px), var(--max));
+      margin:0 auto;
+      padding:20px 0 32px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      margin-bottom:16px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      position:sticky;
+      top:10px;
+      backdrop-filter:blur(14px);
+      z-index:10;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+    .badge{
+      width:50px;
+      height:50px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      letter-spacing:1.5px;
+      color:#13161b;
+      background:linear-gradient(135deg, var(--gold2), var(--gold));
+      box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset, 0 14px 30px rgba(212,175,55,0.12);
+      flex:0 0 auto;
+    }
+    .brand h1{
+      margin:0;
+      font-size:clamp(20px, 3vw, 30px);
+      letter-spacing:1px;
+    }
+    .brand p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .btn, button{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:12px 18px;
+      font-weight:800;
+      font-size:15px;
+      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover, button:hover{transform:translateY(-1px)}
+    .btn:disabled, button:disabled{opacity:.6; cursor:not-allowed; transform:none}
+    .btn-gold{
+      color:#111317;
+      background:linear-gradient(135deg, var(--gold2), var(--gold));
+      box-shadow:0 14px 30px rgba(212,175,55,0.14);
+    }
+    .btn-dark{
+      color:var(--text);
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .grid{
+      display:grid;
+      gap:16px;
+    }
+    .grid-hero{
+      grid-template-columns:1.2fr .8fr;
+      align-items:start;
+    }
+    .panel{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panel-body{padding:18px}
+    .hero{
+      padding:22px;
+    }
+    .hero h2{
+      margin:0 0 10px;
+      font-size:clamp(28px, 4vw, 44px);
+      line-height:1.02;
+    }
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.5;
+      max-width:760px;
+    }
+    .hero-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .auth-wrap{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .input, input, select, textarea{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.035);
+      color:var(--text);
+      padding:14px 15px;
+      font-size:15px;
+      outline:none;
+    }
+    input::placeholder, textarea::placeholder{color:#c1b896}
+    select option{color:#111}
+    textarea{min-height:96px; resize:vertical}
+    .field-label{
+      display:block;
+      margin:0 0 8px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+    }
+    .stack{display:grid; gap:12px}
+    .mini{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .stats{
+      grid-template-columns:repeat(5,1fr);
+    }
+    .stat{
+      padding:16px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      box-shadow:var(--shadow);
+    }
+    .stat .label{
+      color:var(--muted);
+      font-weight:700;
+      font-size:12px;
+      letter-spacing:.9px;
+      text-transform:uppercase;
+    }
+    .stat .value{
+      font-size:32px;
+      font-weight:900;
+      margin-top:8px;
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:1.3fr .7fr .7fr .7fr auto auto;
+      gap:12px;
+      align-items:end;
+      margin:18px 0;
+    }
+
+    .results{
+      display:grid;
+      gap:16px;
+    }
+
+    .case-card{
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at top left, rgba(212,175,55,0.08), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .case-head{
+      padding:18px 18px 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .case-title{
+      margin:0;
+      font-size:24px;
+      line-height:1.08;
+    }
+    .case-sub{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+    .pills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:.5px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.05);
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .pill.gold{background:rgba(212,175,55,0.16); border-color:rgba(212,175,55,0.34); color:#f3df96}
+    .pill.ok{background:rgba(143,216,159,0.12); border-color:rgba(143,216,159,0.3); color:#b7efc2}
+    .pill.warn{background:rgba(255,163,107,0.12); border-color:rgba(255,163,107,0.3); color:#ffd0a8}
+    .pill.danger{background:rgba(255,122,122,0.12); border-color:rgba(255,122,122,0.28); color:#ffb0b0}
+
+    .case-body{
+      padding:0 18px 18px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .data-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .info{
+      padding:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+      border-radius:18px;
+      min-height:74px;
+    }
+    .info .k{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.75px;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .info .v{
+      font-size:15px;
+      line-height:1.45;
+      word-break:break-word;
+    }
+
+    .ops{
+      padding:14px;
+      border:1px solid rgba(212,175,55,0.18);
+      background:rgba(255,255,255,0.03);
+      border-radius:22px;
+    }
+    .ops-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .ops-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .status-line{
+      margin:8px 0 0;
+      min-height:22px;
+      color:var(--muted);
+      font-size:14px;
+      font-weight:700;
+    }
+    .status-line.error{color:#ffb0b0}
+    .status-line.ok{color:#b7efc2}
+
+    .hidden{display:none !important}
+    .empty{
+      text-align:center;
+      padding:34px 18px;
+      color:var(--muted);
+      border:1px dashed rgba(212,175,55,0.2);
+      border-radius:22px;
+    }
+    .logout-wrap{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .foot{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+
+    @media (max-width: 1080px){
+      .grid-hero, .auth-wrap, .case-body, .stats, .toolbar, .ops-grid{
+        grid-template-columns:1fr;
+      }
+    }
+    @media (max-width: 760px){
+      .shell{width:min(calc(100% - 16px), var(--max)); padding-top:14px}
+      .topbar{padding:12px}
+      .brand h1{font-size:24px}
+      .brand p{display:none}
+      .case-head{padding:16px 16px 10px}
+      .case-body{padding:0 16px 16px}
+      .data-grid{grid-template-columns:1fr}
+      .hero{padding:18px}
+      .hero h2{font-size:30px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge">SP</div>
+        <div>
+          <h1>SHADOWPOINT CASE OS</h1>
+          <p>Fast field dashboard for bail, skip, and recovery operations</p>
+        </div>
+      </div>
+      <div class="logout-wrap">
+        <button class="btn btn-dark" id="refreshBtn" type="button">Refresh</button>
+        <button class="btn btn-gold hidden" id="logoutBtn" type="button">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="grid grid-hero">
+      <section class="panel hero">
+        <h2>One screen for active bail and recovery cases.</h2>
+        <p>Review new intakes, sort by status, push cases into recovery, add field notes, assign work, and keep next action visible from your phone.</p>
+        <div class="hero-actions">
+          <a class="btn btn-dark" href="#cases">Jump to cases</a>
+          <a class="btn btn-dark" href="tel:9105806026">Call 910-580-6026</a>
+        </div>
+      </section>
+
+      <section class="panel panel-body">
+        <div id="authPanel">
+          <div class="stack">
+            <div>
+              <span class="field-label">Dashboard access</span>
+              <h3 style="margin:0 0 8px; font-size:24px;">Sign in to manage cases</h3>
+              <div class="mini">Use your Supabase user account. Password sign-in is fastest. Magic link is available if you prefer email sign-in.</div>
+            </div>
+            <div class="auth-wrap">
+              <div class="stack">
+                <div>
+                  <label class="field-label" for="emailInput">Email</label>
+                  <input id="emailInput" type="email" placeholder="you@example.com" autocomplete="username" />
+                </div>
+                <div>
+                  <label class="field-label" for="passwordInput">Password</label>
+                  <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password" />
+                </div>
+              </div>
+              <div class="stack">
+                <button class="btn btn-gold" id="signInBtn" type="button">Sign In</button>
+                <button class="btn btn-dark" id="magicLinkBtn" type="button">Send Magic Link</button>
+                <div class="mini">If you do not have a user yet, create one in Supabase Authentication with your email and a password.</div>
+              </div>
+            </div>
+            <div id="authStatus" class="status-line"></div>
+          </div>
+        </div>
+
+        <div id="sessionPanel" class="hidden">
+          <span class="field-label">Signed in</span>
+          <h3 id="sessionUser" style="margin:0 0 8px; font-size:24px;">-</h3>
+          <div class="mini">Authenticated users can read and update case records. Intake pages still insert new records from the public site.</div>
+          <div id="sessionStatus" class="status-line"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="grid stats" style="margin-top:16px;">
+      <div class="stat"><div class="label">Total Cases</div><div class="value" id="statTotal">0</div></div>
+      <div class="stat"><div class="label">Open</div><div class="value" id="statOpen">0</div></div>
+      <div class="stat"><div class="label">In Recovery</div><div class="value" id="statRecovery">0</div></div>
+      <div class="stat"><div class="label">Missed Court</div><div class="value" id="statMissedCourt">0</div></div>
+      <div class="stat"><div class="label">Watchlist</div><div class="value" id="statWatchlist">0</div></div>
+    </section>
+
+    <section id="cases" style="margin-top:18px;">
+      <div class="toolbar">
+        <div>
+          <label class="field-label" for="searchInput">Search</label>
+          <input id="searchInput" type="text" placeholder="Name, phone, location, county, notes" />
+        </div>
+        <div>
+          <label class="field-label" for="typeFilter">Type</label>
+          <select id="typeFilter">
+            <option value="all">All</option>
+            <option value="bail">Bail</option>
+            <option value="recovery">Recovery</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="statusFilter">Status</label>
+          <select id="statusFilter">
+            <option value="all">All</option>
+            <option>Open</option>
+            <option>Closed</option>
+            <option>Missed Court</option>
+            <option>Missed Payment</option>
+            <option>In Recovery</option>
+            <option>Located</option>
+            <option>Needs Follow-Up</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="watchFilter">Watchlist</label>
+          <select id="watchFilter">
+            <option value="all">All</option>
+            <option value="yes">Watchlist Only</option>
+            <option value="no">Not Watchlist</option>
+          </select>
+        </div>
+        <button class="btn btn-dark" id="clearFiltersBtn" type="button">Clear Filters</button>
+        <button class="btn btn-gold" id="reloadCasesBtn" type="button">Reload Cases</button>
+      </div>
+
+      <div id="results" class="results"></div>
+      <div id="emptyState" class="empty hidden">No cases match the current filters.</div>
+    </section>
+
+    <div class="foot">ShadowPoint Case OS dashboard uses your Supabase project directly. Keep this page private and use authenticated sign-in for admin access.</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://hulcxftmoazrvkjqqyuk.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const STATUS_OPTIONS = ["Open", "Closed", "Missed Court", "Missed Payment", "In Recovery", "Located", "Needs Follow-Up"];
+    const PRIORITY_OPTIONS = ["Low", "Normal", "High", "Urgent"];
+
+    const state = {
+      session: null,
+      rows: [],
+      filtered: []
+    };
+
+    const els = {
+      authPanel: document.getElementById("authPanel"),
+      sessionPanel: document.getElementById("sessionPanel"),
+      sessionUser: document.getElementById("sessionUser"),
+      authStatus: document.getElementById("authStatus"),
+      sessionStatus: document.getElementById("sessionStatus"),
+      emailInput: document.getElementById("emailInput"),
+      passwordInput: document.getElementById("passwordInput"),
+      signInBtn: document.getElementById("signInBtn"),
+      magicLinkBtn: document.getElementById("magicLinkBtn"),
+      logoutBtn: document.getElementById("logoutBtn"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      reloadCasesBtn: document.getElementById("reloadCasesBtn"),
+      searchInput: document.getElementById("searchInput"),
+      typeFilter: document.getElementById("typeFilter"),
+      statusFilter: document.getElementById("statusFilter"),
+      watchFilter: document.getElementById("watchFilter"),
+      clearFiltersBtn: document.getElementById("clearFiltersBtn"),
+      results: document.getElementById("results"),
+      emptyState: document.getElementById("emptyState"),
+      statTotal: document.getElementById("statTotal"),
+      statOpen: document.getElementById("statOpen"),
+      statRecovery: document.getElementById("statRecovery"),
+      statMissedCourt: document.getElementById("statMissedCourt"),
+      statWatchlist: document.getElementById("statWatchlist")
+    };
+
+    function setStatus(el, text, type = "") {
+      el.textContent = text || "";
+      el.className = "status-line" + (type ? " " + type : "");
+    }
+
+    function fmtDate(v) {
+      if (!v) return "—";
+      try {
+        const d = new Date(v);
+        if (Number.isNaN(d.getTime())) return v;
+        return d.toLocaleString();
+      } catch {
+        return v;
+      }
+    }
+
+    function safe(v) {
+      return (v ?? "").toString().trim();
+    }
+
+    function statusClass(status) {
+      switch ((status || "").toLowerCase()) {
+        case "closed": return "ok";
+        case "in recovery": return "warn";
+        case "missed court":
+        case "missed payment": return "danger";
+        default: return "gold";
+      }
+    }
+
+    function normalizeBail(row) {
+      const name = safe(row.defendant_name || row.name) || "Unnamed defendant";
+      const phone = safe(row.requester_phone || row.phone);
+      const location = safe(row.jail_location);
+      const bond = safe(row.bond_amount || row.bond);
+      const notes = safe(row.admin_notes || "") || safe(row.notes);
+      const publicNotes = safe(row.notes);
+      return {
+        id: row.id,
+        table: "bail_intakes",
+        type: "bail",
+        typeLabel: "Bail",
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        name,
+        requester: safe(row.requester_name),
+        phone,
+        location,
+        bond,
+        charge: safe(row.charge),
+        vehicle: "",
+        caseInfo: "",
+        publicNotes,
+        status: safe(row.case_status) || "Open",
+        priority: safe(row.priority) || "Normal",
+        assignedAgent: safe(row.assigned_agent),
+        county: safe(row.county),
+        nextAction: safe(row.next_action),
+        adminNotes: safe(row.admin_notes),
+        watchlist: !!row.watchlist,
+        sourcePage: safe(row.source_page),
+        raw: row
+      };
+    }
+
+    function normalizeRecovery(row) {
+      const name = safe(row.defendant_name || row.name) || "Unnamed defendant";
+      const phone = safe(row.requester_phone || row.phone);
+      const location = safe(row.last_known_location || row.last_seen);
+      const notes = safe(row.admin_notes || "") || safe(row.case_notes || row.notes);
+      return {
+        id: row.id,
+        table: "recovery_requests",
+        type: "recovery",
+        typeLabel: "Recovery",
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        name,
+        requester: safe(row.requester_name_agency || row.requester_name),
+        phone,
+        location,
+        bond: "",
+        charge: "",
+        vehicle: safe(row.vehicle),
+        caseInfo: safe(row.case_bond_information),
+        publicNotes: safe(row.case_notes || row.notes),
+        status: safe(row.case_status) || "Open",
+        priority: safe(row.priority) || "Normal",
+        assignedAgent: safe(row.assigned_agent),
+        county: safe(row.county),
+        nextAction: safe(row.next_action),
+        adminNotes: safe(row.admin_notes),
+        watchlist: !!row.watchlist,
+        sourcePage: safe(row.source_page),
+        raw: row
+      };
+    }
+
+    async function fetchCases() {
+      if (!state.session) {
+        state.rows = [];
+        render();
+        return;
+      }
+
+      setStatus(els.sessionStatus, "Loading cases...");
+      const bailPromise = supabase
+        .from("bail_intakes")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const recoveryPromise = supabase
+        .from("recovery_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const [bailRes, recoveryRes] = await Promise.all([bailPromise, recoveryPromise]);
+
+      if (bailRes.error || recoveryRes.error) {
+        const msg = bailRes.error?.message || recoveryRes.error?.message || "Could not load cases.";
+        setStatus(els.sessionStatus, msg, "error");
+        state.rows = [];
+        render();
+        return;
+      }
+
+      state.rows = [
+        ...(bailRes.data || []).map(normalizeBail),
+        ...(recoveryRes.data || []).map(normalizeRecovery)
+      ].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+      setStatus(els.sessionStatus, "Cases loaded.", "ok");
+      render();
+    }
+
+    function applyFilters() {
+      const search = safe(els.searchInput.value).toLowerCase();
+      const type = els.typeFilter.value;
+      const status = els.statusFilter.value;
+      const watch = els.watchFilter.value;
+
+      state.filtered = state.rows.filter(row => {
+        if (type !== "all" && row.type !== type) return false;
+        if (status !== "all" && row.status !== status) return false;
+        if (watch === "yes" && !row.watchlist) return false;
+        if (watch === "no" && row.watchlist) return false;
+
+        if (!search) return true;
+        const hay = [
+          row.name, row.requester, row.phone, row.location, row.bond, row.charge, row.vehicle,
+          row.caseInfo, row.publicNotes, row.adminNotes, row.county, row.nextAction, row.assignedAgent,
+          row.status, row.priority, row.typeLabel, row.sourcePage
+        ].join(" ").toLowerCase();
+        return hay.includes(search);
+      });
+    }
+
+    function renderStats() {
+      const rows = state.filtered.length ? state.filtered : state.rows;
+      const count = (s) => rows.filter(r => r.status === s).length;
+      els.statTotal.textContent = String(state.rows.length);
+      els.statOpen.textContent = String(count("Open"));
+      els.statRecovery.textContent = String(count("In Recovery"));
+      els.statMissedCourt.textContent = String(count("Missed Court"));
+      els.statWatchlist.textContent = String(state.rows.filter(r => r.watchlist).length);
+    }
+
+    function render() {
+      applyFilters();
+      renderStats();
+      els.results.innerHTML = "";
+
+      if (!state.filtered.length) {
+        els.emptyState.classList.remove("hidden");
+        return;
+      }
+
+      els.emptyState.classList.add("hidden");
+      const frag = document.createDocumentFragment();
+
+      state.filtered.forEach(row => {
+        const card = document.createElement("article");
+        card.className = "case-card";
+        card.innerHTML = `
+          <div class="case-head">
+            <div>
+              <h3 class="case-title">${escapeHtml(row.name)}</h3>
+              <p class="case-sub">Created ${escapeHtml(fmtDate(row.created_at))}${row.updated_at ? ` · Updated ${escapeHtml(fmtDate(row.updated_at))}` : ""}</p>
+            </div>
+            <div class="pills">
+              <span class="pill ${statusClass(row.status)}">${escapeHtml(row.status || "Open")}</span>
+              <span class="pill">${escapeHtml(row.typeLabel)}</span>
+              <span class="pill">${escapeHtml(row.priority || "Normal")}</span>
+              ${row.watchlist ? '<span class="pill danger">Watchlist</span>' : ''}
+            </div>
+          </div>
+
+          <div class="case-body">
+            <div class="data-grid">
+              <div class="info"><span class="k">Requester / Agency</span><div class="v">${escapeHtml(row.requester || "—")}</div></div>
+              <div class="info"><span class="k">Phone</span><div class="v">${escapeHtml(row.phone || "—")}</div></div>
+              <div class="info"><span class="k">Location / Jail / Last Known</span><div class="v">${escapeHtml(row.location || "—")}</div></div>
+              <div class="info"><span class="k">Bond / Charge / Vehicle</span><div class="v">${escapeHtml(compactJoin([row.bond, row.charge, row.vehicle], " · ") || row.caseInfo || "—")}</div></div>
+              <div class="info"><span class="k">County</span><div class="v">${escapeHtml(row.county || "—")}</div></div>
+              <div class="info"><span class="k">Public Intake Notes</span><div class="v">${escapeHtml(row.publicNotes || "—")}</div></div>
+            </div>
+
+            <div class="ops">
+              <div class="ops-grid">
+                <div>
+                  <label class="field-label" for="status-${row.table}-${row.id}">Case Status</label>
+                  <select id="status-${row.table}-${row.id}">
+                    ${STATUS_OPTIONS.map(v => `<option value="${escapeAttr(v)}" ${v === row.status ? "selected" : ""}>${escapeHtml(v)}</option>`).join("")}
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="priority-${row.table}-${row.id}">Priority</label>
+                  <select id="priority-${row.table}-${row.id}">
+                    ${PRIORITY_OPTIONS.map(v => `<option value="${escapeAttr(v)}" ${v === row.priority ? "selected" : ""}>${escapeHtml(v)}</option>`).join("")}
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="agent-${row.table}-${row.id}">Assigned Agent</label>
+                  <input id="agent-${row.table}-${row.id}" type="text" value="${escapeAttr(row.assignedAgent || "")}" placeholder="Agent name" />
+                </div>
+                <div>
+                  <label class="field-label" for="county-${row.table}-${row.id}">County</label>
+                  <input id="county-${row.table}-${row.id}" type="text" value="${escapeAttr(row.county || "")}" placeholder="County" />
+                </div>
+                <div style="grid-column:1 / -1;">
+                  <label class="field-label" for="action-${row.table}-${row.id}">Next Action</label>
+                  <input id="action-${row.table}-${row.id}" type="text" value="${escapeAttr(row.nextAction || "")}" placeholder="Next field step, call, lead, or follow-up" />
+                </div>
+                <div style="grid-column:1 / -1;">
+                  <label class="field-label" for="notes-${row.table}-${row.id}">Admin Notes</label>
+                  <textarea id="notes-${row.table}-${row.id}" placeholder="Field notes, lead notes, address checks, payment issues, court issues">${escapeHtml(row.adminNotes || "")}</textarea>
+                </div>
+              </div>
+
+              <div class="ops-actions">
+                <label class="pill">
+                  <input id="watch-${row.table}-${row.id}" type="checkbox" ${row.watchlist ? "checked" : ""} style="width:auto; margin:0;" />
+                  Watchlist
+                </label>
+                ${row.phone ? `<a class="btn btn-dark" href="tel:${escapeAttr(row.phone.replace(/[^0-9+]/g, ""))}">Call</a>` : ""}
+                <button class="btn btn-gold" type="button" data-save="${row.table}|${row.id}">Save Update</button>
+              </div>
+              <div class="status-line" id="save-status-${row.table}-${row.id}"></div>
+            </div>
+          </div>
+        `;
+        frag.appendChild(card);
+      });
+
+      els.results.appendChild(frag);
+    }
+
+    function compactJoin(parts, sep) {
+      return parts.filter(Boolean).join(sep);
+    }
+
+    function escapeHtml(v) {
+      return String(v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function escapeAttr(v) {
+      return escapeHtml(v);
+    }
+
+    async function saveRow(table, id) {
+      const prefix = `${table}-${id}`;
+      const payload = {
+        case_status: document.getElementById(`status-${prefix}`).value,
+        priority: document.getElementById(`priority-${prefix}`).value,
+        assigned_agent: document.getElementById(`agent-${prefix}`).value.trim(),
+        county: document.getElementById(`county-${prefix}`).value.trim(),
+        next_action: document.getElementById(`action-${prefix}`).value.trim(),
+        admin_notes: document.getElementById(`notes-${prefix}`).value.trim(),
+        watchlist: document.getElementById(`watch-${prefix}`).checked,
+        updated_at: new Date().toISOString()
+      };
+
+      const statusEl = document.getElementById(`save-status-${prefix}`);
+      setStatus(statusEl, "Saving...");
+
+      const { error } = await supabase
+        .from(table)
+        .update(payload)
+        .eq("id", id);
+
+      if (error) {
+        setStatus(statusEl, `Save failed: ${error.message}`, "error");
+        return;
+      }
+
+      setStatus(statusEl, "Saved.", "ok");
+      await fetchCases();
+    }
+
+    async function handleSignIn() {
+      const email = els.emailInput.value.trim();
+      const password = els.passwordInput.value.trim();
+      if (!email || !password) {
+        setStatus(els.authStatus, "Enter email and password.", "error");
+        return;
+      }
+      setStatus(els.authStatus, "Signing in...");
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setStatus(els.authStatus, error.message, "error");
+        return;
+      }
+      setStatus(els.authStatus, "Signed in.", "ok");
+    }
+
+    async function handleMagicLink() {
+      const email = els.emailInput.value.trim();
+      if (!email) {
+        setStatus(els.authStatus, "Enter your email first.", "error");
+        return;
+      }
+      setStatus(els.authStatus, "Sending magic link...");
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.href.split("#")[0]
+        }
+      });
+      if (error) {
+        setStatus(els.authStatus, error.message, "error");
+        return;
+      }
+      setStatus(els.authStatus, "Magic link sent. Check your email.", "ok");
+    }
+
+    async function handleLogout() {
+      await supabase.auth.signOut();
+    }
+
+    async function refreshSessionUI() {
+      const { data } = await supabase.auth.getSession();
+      state.session = data.session || null;
+
+      if (state.session) {
+        els.authPanel.classList.add("hidden");
+        els.sessionPanel.classList.remove("hidden");
+        els.logoutBtn.classList.remove("hidden");
+        els.sessionUser.textContent = state.session.user?.email || "Signed in";
+        await fetchCases();
+      } else {
+        els.authPanel.classList.remove("hidden");
+        els.sessionPanel.classList.add("hidden");
+        els.logoutBtn.classList.add("hidden");
+        setStatus(els.sessionStatus, "");
+        state.rows = [];
+        render();
+      }
+    }
+
+    function bindEvents() {
+      els.signInBtn.addEventListener("click", handleSignIn);
+      els.magicLinkBtn.addEventListener("click", handleMagicLink);
+      els.logoutBtn.addEventListener("click", handleLogout);
+      els.refreshBtn.addEventListener("click", refreshSessionUI);
+      els.reloadCasesBtn.addEventListener("click", fetchCases);
+      els.searchInput.addEventListener("input", render);
+      els.typeFilter.addEventListener("change", render);
+      els.statusFilter.addEventListener("change", render);
+      els.watchFilter.addEventListener("change", render);
+      els.clearFiltersBtn.addEventListener("click", () => {
+        els.searchInput.value = "";
+        els.typeFilter.value = "all";
+        els.statusFilter.value = "all";
+        els.watchFilter.value = "all";
+        render();
+      });
+
+      els.results.addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-save]");
+        if (!btn) return;
+        const [table, id] = btn.getAttribute("data-save").split("|");
+        await saveRow(table, id);
+      });
+
+      supabase.auth.onAuthStateChange(async () => {
+        await refreshSessionUI();
+      });
+    }
+
+    bindEvents();
+    refreshSessionUI();
+  </script>
+</body>
+</html>
