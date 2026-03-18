@@ -53,16 +53,9 @@
       padding: 12px;
       margin-top: 12px;
     }
-    .muted {
-      color: #bbb;
-      font-size: 14px;
-    }
-    .ok {
-      color: #8be28b;
-    }
-    .bad {
-      color: #ff7b7b;
-    }
+    .muted { color: #bbb; font-size: 14px; }
+    .ok { color: #8be28b; font-size: 16px; font-weight: bold; }
+    .bad { color: #ff7b7b; font-size: 16px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -76,15 +69,15 @@
     <h2>Admin Login</h2>
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-    <button id="loginBtn">Sign In</button>
-    <button id="magicBtn" class="secondary">Send Magic Link</button>
+    <button id="loginBtn" type="button">Sign In</button>
+    <button id="magicBtn" type="button" class="secondary">Send Magic Link</button>
     <div id="loginMsg" class="muted"></div>
   </div>
 
   <div id="appCard" class="card hidden">
     <h2>Cases</h2>
-    <button id="refreshBtn" class="secondary">Refresh Cases</button>
-    <button id="logoutBtn" class="secondary">Log Out</button>
+    <button id="refreshBtn" type="button" class="secondary">Refresh Cases</button>
+    <button id="logoutBtn" type="button" class="secondary">Log Out</button>
     <div id="loadMsg" class="muted"></div>
     <div id="cases"></div>
   </div>
@@ -104,19 +97,47 @@ const casesDiv = document.getElementById("cases");
 
 function showLoggedOut() {
   sessionStatus.textContent = "Not signed in";
+  sessionStatus.className = "muted";
   loginCard.classList.remove("hidden");
   appCard.classList.add("hidden");
 }
 
 function showLoggedIn(email) {
   sessionStatus.textContent = "Signed in: " + email;
+  sessionStatus.className = "ok";
   loginCard.classList.add("hidden");
   appCard.classList.remove("hidden");
+}
+
+function esc(v) {
+  return String(v || "").replace(/[&<>"']/g, function(s) {
+    return ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    })[s];
+  });
+}
+
+function normalizeCase(row, table) {
+  return {
+    id: row.id,
+    table,
+    name: row.defendant_name || row.name || "(No name)",
+    status: row.status || "Open",
+    county: row.county || "",
+    assigned_agent: row.assigned_agent || "",
+    admin_notes: row.admin_notes || "",
+    created_at: row.created_at || ""
+  };
 }
 
 async function checkSession() {
   try {
     const { data, error } = await supabase.auth.getSession();
+
     if (error) {
       sessionStatus.textContent = "SESSION ERROR: " + error.message;
       sessionStatus.className = "bad";
@@ -125,6 +146,7 @@ async function checkSession() {
     }
 
     const session = data.session;
+
     if (session && session.user) {
       showLoggedIn(session.user.email);
       await loadCases();
@@ -152,10 +174,7 @@ async function login() {
   loginMsg.className = "muted";
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       loginMsg.textContent = "LOGIN FAILED: " + error.message;
@@ -163,14 +182,13 @@ async function login() {
       return;
     }
 
-    loginMsg.textContent = "Login success.";
+    loginMsg.textContent = "Login success. Reloading...";
     loginMsg.className = "ok";
 
-    if (data.user) {
-      showLoggedIn(data.user.email);
-    }
+    setTimeout(function () {
+      window.location.href = "https://kyleyarbro.github.io/SPDB/?r=" + Date.now();
+    }, 600);
 
-    await checkSession();
   } catch (err) {
     loginMsg.textContent = "LOGIN CRASH: " + err.message;
     loginMsg.className = "bad";
@@ -203,19 +221,6 @@ async function sendMagicLink() {
   loginMsg.className = "ok";
 }
 
-function normalizeCase(row, table) {
-  return {
-    id: row.id,
-    table,
-    name: row.defendant_name || row.name || "(No name)",
-    status: row.status || "Open",
-    county: row.county || "",
-    assigned_agent: row.assigned_agent || "",
-    admin_notes: row.admin_notes || "",
-    created_at: row.created_at || ""
-  };
-}
-
 async function loadCases() {
   loadMsg.textContent = "Loading cases...";
   loadMsg.className = "muted";
@@ -246,6 +251,7 @@ async function loadCases() {
 
     if (!allCases.length) {
       loadMsg.textContent = "No cases found yet.";
+      loadMsg.className = "muted";
       return;
     }
 
@@ -256,13 +262,13 @@ async function loadCases() {
       const box = document.createElement("div");
       box.className = "case";
       box.innerHTML = `
-        <h3>${item.name}</h3>
-        <div class="muted">Table: ${item.table}</div>
-        <div class="muted">Created: ${item.created_at}</div>
-        <div class="muted">Status: ${item.status}</div>
-        <div class="muted">County: ${item.county}</div>
-        <div class="muted">Agent: ${item.assigned_agent}</div>
-        <div class="muted">Notes: ${item.admin_notes || "(none)"}</div>
+        <h3>${esc(item.name)}</h3>
+        <div class="muted">Table: ${esc(item.table)}</div>
+        <div class="muted">Created: ${esc(item.created_at)}</div>
+        <div class="muted">Status: ${esc(item.status)}</div>
+        <div class="muted">County: ${esc(item.county)}</div>
+        <div class="muted">Agent: ${esc(item.assigned_agent)}</div>
+        <div class="muted">Notes: ${esc(item.admin_notes || "(none)")}</div>
       `;
       casesDiv.appendChild(box);
     });
@@ -274,12 +280,14 @@ async function loadCases() {
 
 async function logout() {
   const { error } = await supabase.auth.signOut();
+
   if (error) {
     sessionStatus.textContent = "LOGOUT FAILED: " + error.message;
     sessionStatus.className = "bad";
     return;
   }
-  showLoggedOut();
+
+  window.location.href = "https://kyleyarbro.github.io/SPDB/?logout=" + Date.now();
 }
 
 document.getElementById("loginBtn").addEventListener("click", login);
