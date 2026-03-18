@@ -56,6 +56,14 @@
     .muted { color: #bbb; font-size: 14px; }
     .ok { color: #8be28b; font-size: 16px; font-weight: bold; }
     .bad { color: #ff7b7b; font-size: 16px; font-weight: bold; }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 700px) {
+      .row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -75,10 +83,11 @@
   </div>
 
   <div id="appCard" class="card hidden">
-    <h2>Cases</h2>
-    <button id="refreshBtn" type="button" class="secondary">Refresh Cases</button>
-    <button id="logoutBtn" type="button" class="secondary">Log Out</button>
-    <div id="loadMsg" class="muted"></div>
+    <div class="row">
+      <button id="refreshBtn" type="button" class="secondary">Refresh Cases</button>
+      <button id="logoutBtn" type="button" class="secondary">Log Out</button>
+    </div>
+    <div id="loadMsg" class="muted" style="margin-top:10px;"></div>
     <div id="cases"></div>
   </div>
 
@@ -182,12 +191,12 @@ async function login() {
       return;
     }
 
-    loginMsg.textContent = "Login success. Reloading...";
+    loginMsg.textContent = "Login success.";
     loginMsg.className = "ok";
 
-    setTimeout(function () {
-      window.location.href = "https://kyleyarbro.github.io/SPDB/?r=" + Date.now();
-    }, 600);
+    setTimeout(async () => {
+      await checkSession();
+    }, 500);
 
   } catch (err) {
     loginMsg.textContent = "LOGIN CRASH: " + err.message;
@@ -287,7 +296,9 @@ async function logout() {
     return;
   }
 
-  window.location.href = "https://kyleyarbro.github.io/SPDB/?logout=" + Date.now();
+  showLoggedOut();
+  loadMsg.textContent = "";
+  casesDiv.innerHTML = "";
 }
 
 document.getElementById("loginBtn").addEventListener("click", login);
