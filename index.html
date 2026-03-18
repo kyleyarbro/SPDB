@@ -3,391 +3,170 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ShadowPoint Case OS</title>
+  <title>ShadowPoint Login Test</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0b0b0b;
+      background: #111;
       color: #fff;
-      margin: 0;
-      padding: 15px;
+      padding: 20px;
     }
     .card {
-      background: #151515;
-      border: 1px solid #2c2c2c;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 15px;
-    }
-    h1, h2, h3 { margin-top: 0; }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0;
-      font-size: 16px;
-      border-radius: 10px;
+      background: #1a1a1a;
       border: 1px solid #333;
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      margin: 8px 0;
+      border-radius: 10px;
       box-sizing: border-box;
     }
-    input, select, textarea {
+    input {
       background: #0f0f0f;
       color: #fff;
+      border: 1px solid #333;
     }
     button {
-      background: #c9a44c;
-      color: #111;
-      font-weight: bold;
       border: none;
+      background: gold;
+      color: black;
+      font-weight: bold;
     }
-    .secondary {
-      background: #2a2a2a;
-      color: #fff;
-    }
-    .hidden {
-      display: none;
-    }
-    .case {
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 12px;
+    #msg {
       margin-top: 12px;
-    }
-    .muted { color: #bbb; font-size: 14px; }
-    .ok { color: #8be28b; font-size: 16px; font-weight: bold; }
-    .bad { color: #ff7b7b; font-size: 16px; font-weight: bold; }
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    @media (max-width: 700px) {
-      .row { grid-template-columns: 1fr; }
-    }
-    .pill {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: #222;
-      color: #ddd;
-      font-size: 12px;
-      margin-left: 8px;
+      font-size: 18px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>SHADOWPOINT CASE OS</h1>
-    <div id="sessionStatus" class="muted">Loading...</div>
-  </div>
+    <h1>SHADOWPOINT LOGIN TEST</h1>
+    <p id="top">Page loaded.</p>
 
-  <div id="loginCard" class="card">
-    <h2>Admin Login</h2>
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-    <button type="button" onclick="doLogin()">Sign In</button>
-    <button type="button" class="secondary" onclick="sendMagicLink()">Send Magic Link</button>
-    <div id="loginMsg" class="muted"></div>
+
+    <button onclick="doLogin()">Sign In</button>
+    <button onclick="checkSession()">Check Session</button>
+    <button onclick="doLogout()">Log Out</button>
+
+    <div id="msg">Waiting.</div>
   </div>
 
-  <div id="appCard" class="hidden">
-    <div class="card">
-      <div class="row">
-        <button type="button" class="secondary" onclick="loadCases()">Refresh Cases</button>
-        <button type="button" class="secondary" onclick="doLogout()">Log Out</button>
-      </div>
-      <div id="loadMsg" class="muted" style="margin-top:10px;"></div>
-    </div>
+  <script>
+    const SUPABASE_URL = "https://hulcxftmoazrvkjqqyuk.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T";
 
-    <div id="cases"></div>
-  </div>
+    const topEl = document.getElementById("top");
+    const msgEl = document.getElementById("msg");
 
-<script>
-const SUPABASE_URL = "https://hulcxftmoazrvkjqqyuk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T";
+    let supabase;
 
-const sessionStatus = document.getElementById("sessionStatus");
-const loginCard = document.getElementById("loginCard");
-const appCard = document.getElementById("appCard");
-const loginMsg = document.getElementById("loginMsg");
-const loadMsg = document.getElementById("loadMsg");
-const casesDiv = document.getElementById("cases");
-
-let supabase = null;
-
-function esc(v) {
-  return String(v || "").replace(/[&<>"']/g, function(s) {
-    return ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    })[s];
-  });
-}
-
-function showLoggedOut() {
-  sessionStatus.textContent = "Not signed in";
-  sessionStatus.className = "muted";
-  loginCard.classList.remove("hidden");
-  appCard.classList.add("hidden");
-}
-
-function showLoggedIn(email) {
-  sessionStatus.textContent = "Signed in: " + email;
-  sessionStatus.className = "ok";
-  loginCard.classList.add("hidden");
-  appCard.classList.remove("hidden");
-}
-
-function setLoginMsg(text, type) {
-  loginMsg.textContent = text;
-  loginMsg.className = type || "muted";
-}
-
-function setLoadMsg(text, type) {
-  loadMsg.textContent = text;
-  loadMsg.className = type || "muted";
-}
-
-function initSupabase() {
-  if (!window.supabase) {
-    sessionStatus.textContent = "Supabase script failed to load.";
-    sessionStatus.className = "bad";
-    return false;
-  }
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return true;
-  } catch (e) {
-    sessionStatus.textContent = "Supabase setup failed: " + e.message;
-    sessionStatus.className = "bad";
-    return false;
-  }
-}
-
-function normalizeCase(row, table) {
-  return {
-    id: row.id,
-    table: table,
-    name: row.defendant_name || row.name || "(No name)",
-    status: row.status || "Open",
-    county: row.county || "",
-    assigned_agent: row.assigned_agent || "",
-    priority: row.priority || "",
-    next_action: row.next_action || "",
-    admin_notes: row.admin_notes || "",
-    watchlist: !!row.watchlist,
-    created_at: row.created_at || ""
-  };
-}
-
-function statusOptions(current) {
-  const list = ["Open", "In Recovery", "Missed Court", "Missed Payment", "Closed"];
-  return list.map(function(x) {
-    return '<option value="' + esc(x) + '"' + (x === current ? ' selected' : '') + '>' + esc(x) + '</option>';
-  }).join('');
-}
-
-async function checkSession() {
-  if (!supabase) return;
-
-  try {
-    const result = await supabase.auth.getSession();
-    if (result.error) {
-      sessionStatus.textContent = "Session error: " + result.error.message;
-      sessionStatus.className = "bad";
-      showLoggedOut();
-      return;
+    try {
+      if (!window.supabase) {
+        topEl.textContent = "Supabase script did not load.";
+      } else {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        topEl.textContent = "Supabase loaded.";
+      }
+    } catch (e) {
+      topEl.textContent = "Supabase init error: " + e.message;
     }
 
-    const session = result.data.session;
-    if (session && session.user) {
-      showLoggedIn(session.user.email);
-      await loadCases();
-    } else {
-      showLoggedOut();
-    }
-  } catch (e) {
-    sessionStatus.textContent = "Session crash: " + e.message;
-    sessionStatus.className = "bad";
-    showLoggedOut();
-  }
-}
+    async function doLogin() {
+      msgEl.textContent = "Sign In button clicked.";
 
-async function doLogin() {
-  if (!supabase) {
-    setLoginMsg("Supabase is not ready.", "bad");
-    return;
-  }
+      if (!supabase) {
+        msgEl.textContent = "Supabase client missing.";
+        return;
+      }
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
 
-  if (!email || !password) {
-    setLoginMsg("Enter email and password.", "bad");
-    return;
-  }
+      if (!email || !password) {
+        msgEl.textContent = "Enter email and password.";
+        return;
+      }
 
-  setLoginMsg("Signing in...", "muted");
+      msgEl.textContent = "Trying login...";
 
-  try {
-    const result = await supabase.auth.signInWithPassword({ email, password });
+      try {
+        const result = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
 
-    if (result.error) {
-      setLoginMsg("Login failed: " + result.error.message, "bad");
-      return;
+        if (result.error) {
+          msgEl.textContent = "LOGIN FAILED: " + result.error.message;
+          return;
+        }
+
+        msgEl.textContent = "LOGIN SUCCESS";
+      } catch (e) {
+        msgEl.textContent = "LOGIN CRASH: " + e.message;
+      }
     }
 
-    setLoginMsg("Login success.", "ok");
-    await checkSession();
-  } catch (e) {
-    setLoginMsg("Login crash: " + e.message, "bad");
-  }
-}
+    async function checkSession() {
+      msgEl.textContent = "Checking session...";
 
-async function sendMagicLink() {
-  if (!supabase) {
-    setLoginMsg("Supabase is not ready.", "bad");
-    return;
-  }
+      if (!supabase) {
+        msgEl.textContent = "Supabase client missing.";
+        return;
+      }
 
-  const email = document.getElementById("email").value.trim();
-  if (!email) {
-    setLoginMsg("Enter your email first.", "bad");
-    return;
-  }
+      try {
+        const result = await supabase.auth.getSession();
 
-  const result = await supabase.auth.signInWithOtp({
-    email: email,
-    options: {
-      emailRedirectTo: "https://kyleyarbro.github.io/SPDB/"
-    }
-  });
+        if (result.error) {
+          msgEl.textContent = "SESSION ERROR: " + result.error.message;
+          return;
+        }
 
-  if (result.error) {
-    setLoginMsg("Magic link failed: " + result.error.message, "bad");
-    return;
-  }
-
-  setLoginMsg("Magic link sent.", "ok");
-}
-
-async function loadCases() {
-  if (!supabase) {
-    setLoadMsg("Supabase is not ready.", "bad");
-    return;
-  }
-
-  setLoadMsg("Loading cases...", "muted");
-  casesDiv.innerHTML = "";
-
-  try {
-    const bailRes = await supabase
-      .from("bail_intakes")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (bailRes.error) {
-      setLoadMsg("Bail load failed: " + bailRes.error.message, "bad");
-      return;
+        if (result.data.session && result.data.session.user) {
+          msgEl.textContent = "SIGNED IN AS: " + result.data.session.user.email;
+        } else {
+          msgEl.textContent = "NO ACTIVE SESSION";
+        }
+      } catch (e) {
+        msgEl.textContent = "SESSION CRASH: " + e.message;
+      }
     }
 
-    const recoveryRes = await supabase
-      .from("recovery_requests")
-      .select("*")
-      .order("created_at", { ascending: false });
+    async function doLogout() {
+      msgEl.textContent = "Logging out...";
 
-    if (recoveryRes.error) {
-      setLoadMsg("Recovery load failed: " + recoveryRes.error.message, "bad");
-      return;
+      if (!supabase) {
+        msgEl.textContent = "Supabase client missing.";
+        return;
+      }
+
+      try {
+        const result = await supabase.auth.signOut();
+
+        if (result.error) {
+          msgEl.textContent = "LOGOUT FAILED: " + result.error.message;
+          return;
+        }
+
+        msgEl.textContent = "LOGGED OUT";
+      } catch (e) {
+        msgEl.textContent = "LOGOUT CRASH: " + e.message;
+      }
     }
 
-    const allCases = []
-      .concat((bailRes.data || []).map(function(row) { return normalizeCase(row, "bail_intakes"); }))
-      .concat((recoveryRes.data || []).map(function(row) { return normalizeCase(row, "recovery_requests"); }));
-
-    if (!allCases.length) {
-      setLoadMsg("No cases found yet.", "muted");
-      return;
-    }
-
-    setLoadMsg("Loaded " + allCases.length + " case(s).", "ok");
-
-    allCases.forEach(function(item) {
-      const card = document.createElement("div");
-      card.className = "card case";
-      card.innerHTML =
-        '<h3>' + esc(item.name) + '<span class="pill">' + esc(item.table) + '</span></h3>' +
-        '<div class="muted">Created: ' + esc(item.created_at) + '</div>' +
-        '<div class="row" style="margin-top:10px;">' +
-          '<div><label>Status</label><select class="field-status">' + statusOptions(item.status) + '</select></div>' +
-          '<div><label>Priority</label><input class="field-priority" value="' + esc(item.priority) + '"></div>' +
-          '<div><label>Assigned Agent</label><input class="field-agent" value="' + esc(item.assigned_agent) + '"></div>' +
-          '<div><label>County</label><input class="field-county" value="' + esc(item.county) + '"></div>' +
-          '<div><label>Next Action</label><input class="field-next" value="' + esc(item.next_action) + '"></div>' +
-          '<div><label>Watchlist</label><select class="field-watchlist"><option value="false"' + (!item.watchlist ? ' selected' : '') + '>No</option><option value="true"' + (item.watchlist ? ' selected' : '') + '>Yes</option></select></div>' +
-        '</div>' +
-        '<div style="margin-top:10px;"><label>Admin Notes</label><textarea class="field-notes" rows="4">' + esc(item.admin_notes) + '</textarea></div>' +
-        '<button type="button" style="margin-top:10px;" onclick="saveCase(this,\'' + esc(item.table) + '\',\'' + esc(item.id) + '\')">Save</button>' +
-        '<div class="saveMsg muted" style="margin-top:8px;"></div>';
-
-      casesDiv.appendChild(card);
-    });
-  } catch (e) {
-    setLoadMsg("Load crash: " + e.message, "bad");
-  }
-}
-
-async function saveCase(button, table, id) {
-  const card = button.closest(".case");
-  const msg = card.querySelector(".saveMsg");
-
-  const payload = {
-    status: card.querySelector(".field-status").value,
-    priority: card.querySelector(".field-priority").value,
-    assigned_agent: card.querySelector(".field-agent").value,
-    county: card.querySelector(".field-county").value,
-    next_action: card.querySelector(".field-next").value,
-    watchlist: card.querySelector(".field-watchlist").value === "true",
-    admin_notes: card.querySelector(".field-notes").value
-  };
-
-  msg.textContent = "Saving...";
-  msg.className = "saveMsg muted";
-
-  const result = await supabase.from(table).update(payload).eq("id", id);
-
-  if (result.error) {
-    msg.textContent = "Save failed: " + result.error.message;
-    msg.className = "saveMsg bad";
-    return;
-  }
-
-  msg.textContent = "Saved.";
-  msg.className = "saveMsg ok";
-}
-
-async function doLogout() {
-  if (!supabase) return;
-
-  const result = await supabase.auth.signOut();
-  if (result.error) {
-    sessionStatus.textContent = "Logout failed: " + result.error.message;
-    sessionStatus.className = "bad";
-    return;
-  }
-
-  casesDiv.innerHTML = "";
-  setLoadMsg("", "muted");
-  setLoginMsg("", "muted");
-  showLoggedOut();
-}
-
-if (initSupabase()) {
-  checkSession();
-}
-</script>
+    window.doLogin = doLogin;
+    window.checkSession = checkSession;
+    window.doLogout = doLogout;
+  </script>
 </body>
 </html>
