@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ShadowPoint Login Test</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <title>ShadowPoint Button Test</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,20 +19,12 @@
       max-width: 700px;
       margin: 0 auto;
     }
-    input, button {
+    button {
       width: 100%;
       padding: 14px;
       font-size: 18px;
       margin: 8px 0;
       border-radius: 10px;
-      box-sizing: border-box;
-    }
-    input {
-      background: #0f0f0f;
-      color: #fff;
-      border: 1px solid #333;
-    }
-    button {
       border: none;
       background: gold;
       color: black;
@@ -48,125 +39,16 @@
 </head>
 <body>
   <div class="card">
-    <h1>SHADOWPOINT LOGIN TEST</h1>
-    <p id="top">Page loaded.</p>
+    <h1>SHADOWPOINT BUTTON TEST</h1>
+    <p id="top">START</p>
 
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-
-    <button onclick="doLogin()">Sign In</button>
-    <button onclick="checkSession()">Check Session</button>
-    <button onclick="doLogout()">Log Out</button>
+    <button onclick="alert('BUTTON CLICKED'); document.getElementById('msg').innerText='Button works';">Tap Me</button>
 
     <div id="msg">Waiting.</div>
   </div>
 
   <script>
-    const SUPABASE_URL = "https://hulcxftmoazrvkjqqyuk.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T";
-
-    const topEl = document.getElementById("top");
-    const msgEl = document.getElementById("msg");
-
-    let supabase;
-
-    try {
-      if (!window.supabase) {
-        topEl.textContent = "Supabase script did not load.";
-      } else {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        topEl.textContent = "Supabase loaded.";
-      }
-    } catch (e) {
-      topEl.textContent = "Supabase init error: " + e.message;
-    }
-
-    async function doLogin() {
-      msgEl.textContent = "Sign In button clicked.";
-
-      if (!supabase) {
-        msgEl.textContent = "Supabase client missing.";
-        return;
-      }
-
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (!email || !password) {
-        msgEl.textContent = "Enter email and password.";
-        return;
-      }
-
-      msgEl.textContent = "Trying login...";
-
-      try {
-        const result = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
-
-        if (result.error) {
-          msgEl.textContent = "LOGIN FAILED: " + result.error.message;
-          return;
-        }
-
-        msgEl.textContent = "LOGIN SUCCESS";
-      } catch (e) {
-        msgEl.textContent = "LOGIN CRASH: " + e.message;
-      }
-    }
-
-    async function checkSession() {
-      msgEl.textContent = "Checking session...";
-
-      if (!supabase) {
-        msgEl.textContent = "Supabase client missing.";
-        return;
-      }
-
-      try {
-        const result = await supabase.auth.getSession();
-
-        if (result.error) {
-          msgEl.textContent = "SESSION ERROR: " + result.error.message;
-          return;
-        }
-
-        if (result.data.session && result.data.session.user) {
-          msgEl.textContent = "SIGNED IN AS: " + result.data.session.user.email;
-        } else {
-          msgEl.textContent = "NO ACTIVE SESSION";
-        }
-      } catch (e) {
-        msgEl.textContent = "SESSION CRASH: " + e.message;
-      }
-    }
-
-    async function doLogout() {
-      msgEl.textContent = "Logging out...";
-
-      if (!supabase) {
-        msgEl.textContent = "Supabase client missing.";
-        return;
-      }
-
-      try {
-        const result = await supabase.auth.signOut();
-
-        if (result.error) {
-          msgEl.textContent = "LOGOUT FAILED: " + result.error.message;
-          return;
-        }
-
-        msgEl.textContent = "LOGGED OUT";
-      } catch (e) {
-        msgEl.textContent = "LOGOUT CRASH: " + e.message;
-      }
-    }
-
-    window.doLogin = doLogin;
-    window.checkSession = checkSession;
-    window.doLogout = doLogout;
+    document.getElementById('top').innerText = 'SCRIPT RAN';
   </script>
 </body>
 </html>
