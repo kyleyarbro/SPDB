@@ -1,316 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShadowPoint Case OS</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShadowPoint Test</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0b0b0b;
+      background: #111;
       color: #fff;
-      margin: 0;
-      padding: 15px;
-    }
-    .card {
-      background: #151515;
-      border: 1px solid #2c2c2c;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 15px;
-    }
-    h1, h2, h3 { margin-top: 0; }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 1px solid #333;
-      box-sizing: border-box;
-    }
-    input {
-      background: #0f0f0f;
-      color: #fff;
+      padding: 20px;
     }
     button {
-      background: #c9a44c;
-      color: #111;
-      font-weight: bold;
-      border: none;
-    }
-    .secondary {
-      background: #2a2a2a;
-      color: #fff;
-    }
-    .hidden { display: none; }
-    .case {
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 12px;
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
       margin-top: 12px;
+      border: none;
+      border-radius: 10px;
+      background: gold;
+      color: black;
+      font-weight: bold;
     }
-    .muted { color: #bbb; font-size: 14px; }
-    .ok { color: #8be28b; font-size: 16px; font-weight: bold; }
-    .bad { color: #ff7b7b; font-size: 16px; font-weight: bold; }
   </style>
 </head>
 <body>
+  <h1>SHADOWPOINT TEST</h1>
+  <p id="status">If JavaScript works, this text will change.</p>
+  <button onclick="testClick()">Tap Me</button>
 
-  <div class="card">
-    <h1>SHADOWPOINT CASE OS</h1>
-    <div id="status" class="muted">Page loading...</div>
-  </div>
+  <script>
+    document.getElementById('status').textContent = 'JavaScript is running.';
+    alert('TEST PAGE LOADED');
 
-  <div id="loginCard" class="card">
-    <h2>Admin Login</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button type="button" onclick="doLogin()">Sign In</button>
-    <button type="button" class="secondary" onclick="checkNow()">Check Session</button>
-    <div id="msg" class="muted"></div>
-  </div>
-
-  <div id="appCard" class="card hidden">
-    <h2>Cases</h2>
-    <button type="button" class="secondary" onclick="loadCases()">Refresh Cases</button>
-    <button type="button" class="secondary" onclick="doLogout()">Log Out</button>
-    <div id="casesMsg" class="muted"></div>
-    <div id="cases"></div>
-  </div>
-
-<script>
-const SUPABASE_URL = "https://hulcxftmoazrvkjqqyuk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T";
-
-const statusEl = document.getElementById("status");
-const msgEl = document.getElementById("msg");
-const casesMsgEl = document.getElementById("casesMsg");
-const casesEl = document.getElementById("cases");
-const loginCard = document.getElementById("loginCard");
-const appCard = document.getElementById("appCard");
-
-let supabase = null;
-
-function setMsg(text, cls) {
-  msgEl.textContent = text;
-  msgEl.className = cls || "muted";
-}
-
-function setStatus(text, cls) {
-  statusEl.textContent = text;
-  statusEl.className = cls || "muted";
-}
-
-function showLoggedOut() {
-  loginCard.classList.remove("hidden");
-  appCard.classList.add("hidden");
-}
-
-function showLoggedIn(email) {
-  loginCard.classList.add("hidden");
-  appCard.classList.remove("hidden");
-  setStatus("Signed in: " + email, "ok");
-}
-
-function esc(v) {
-  return String(v || "").replace(/[&<>"']/g, function(s) {
-    return ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    })[s];
-  });
-}
-
-function initSupabase() {
-  if (!window.supabase) {
-    setStatus("Supabase script did not load.", "bad");
-    setMsg("Supabase script did not load.", "bad");
-    return false;
-  }
-
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    setStatus("Supabase loaded. Checking session...", "muted");
-    return true;
-  } catch (e) {
-    setStatus("Supabase init failed: " + e.message, "bad");
-    setMsg("Supabase init failed: " + e.message, "bad");
-    return false;
-  }
-}
-
-async function checkNow() {
-  if (!supabase) {
-    setMsg("Supabase client not ready.", "bad");
-    return;
-  }
-
-  try {
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      setStatus("Session error: " + error.message, "bad");
-      showLoggedOut();
-      return;
+    function testClick() {
+      alert('BUTTON WORKS');
+      document.getElementById('status').textContent = 'Button click works.';
     }
-
-    if (data.session && data.session.user) {
-      showLoggedIn(data.session.user.email);
-      await loadCases();
-    } else {
-      setStatus("Not signed in", "muted");
-      showLoggedOut();
-    }
-  } catch (e) {
-    setStatus("Session crash: " + e.message, "bad");
-    showLoggedOut();
-  }
-}
-
-async function doLogin() {
-  if (!supabase) {
-    setMsg("Supabase client not ready.", "bad");
-    return;
-  }
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-
-  if (!email || !password) {
-    setMsg("Enter email and password.", "bad");
-    return;
-  }
-
-  setMsg("Signing in...", "muted");
-
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setMsg("Login failed: " + error.message, "bad");
-      return;
-    }
-
-    setMsg("Login success.", "ok");
-
-    if (data.user) {
-      showLoggedIn(data.user.email);
-    }
-
-    await checkNow();
-  } catch (e) {
-    setMsg("Login crash: " + e.message, "bad");
-  }
-}
-
-async function loadCases() {
-  if (!supabase) {
-    casesMsgEl.textContent = "Supabase client not ready.";
-    casesMsgEl.className = "bad";
-    return;
-  }
-
-  casesMsgEl.textContent = "Loading cases...";
-  casesMsgEl.className = "muted";
-  casesEl.innerHTML = "";
-
-  try {
-    const [bailRes, recoveryRes] = await Promise.all([
-      supabase.from("bail_intakes").select("*").order("created_at", { ascending: false }),
-      supabase.from("recovery_requests").select("*").order("created_at", { ascending: false })
-    ]);
-
-    if (bailRes.error) {
-      casesMsgEl.textContent = "Bail load failed: " + bailRes.error.message;
-      casesMsgEl.className = "bad";
-      return;
-    }
-
-    if (recoveryRes.error) {
-      casesMsgEl.textContent = "Recovery load failed: " + recoveryRes.error.message;
-      casesMsgEl.className = "bad";
-      return;
-    }
-
-    const allCases = [
-      ...(bailRes.data || []).map(x => ({
-        table: "bail_intakes",
-        name: x.defendant_name || x.name || "(No name)",
-        status: x.status || "Open",
-        county: x.county || "",
-        notes: x.admin_notes || "",
-        created_at: x.created_at || ""
-      })),
-      ...(recoveryRes.data || []).map(x => ({
-        table: "recovery_requests",
-        name: x.defendant_name || x.name || "(No name)",
-        status: x.status || "Open",
-        county: x.county || "",
-        notes: x.admin_notes || "",
-        created_at: x.created_at || ""
-      }))
-    ];
-
-    if (!allCases.length) {
-      casesMsgEl.textContent = "No cases found yet.";
-      casesMsgEl.className = "muted";
-      return;
-    }
-
-    casesMsgEl.textContent = "Loaded " + allCases.length + " case(s).";
-    casesMsgEl.className = "ok";
-
-    allCases.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "case";
-      div.innerHTML = `
-        <h3>${esc(item.name)}</h3>
-        <div class="muted">Table: ${esc(item.table)}</div>
-        <div class="muted">Status: ${esc(item.status)}</div>
-        <div class="muted">County: ${esc(item.county)}</div>
-        <div class="muted">Created: ${esc(item.created_at)}</div>
-        <div class="muted">Notes: ${esc(item.notes || "(none)")}</div>
-      `;
-      casesEl.appendChild(div);
-    });
-  } catch (e) {
-    casesMsgEl.textContent = "Load crash: " + e.message;
-    casesMsgEl.className = "bad";
-  }
-}
-
-async function doLogout() {
-  if (!supabase) return;
-
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    setStatus("Logout failed: " + error.message, "bad");
-    return;
-  }
-
-  setMsg("");
-  casesMsgEl.textContent = "";
-  casesEl.innerHTML = "";
-  showLoggedOut();
-  setStatus("Logged out", "muted");
-}
-
-window.doLogin = doLogin;
-window.checkNow = checkNow;
-window.loadCases = loadCases;
-window.doLogout = doLogout;
-
-if (initSupabase()) {
-  checkNow();
-}
-</script>
+  </script>
 </body>
 </html>
