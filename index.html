@@ -1,86 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ShadowPoint DEBUG</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body { font-family: Arial; background: #0b0b0b; color: white; padding: 15px; }
-input, button { width:100%; padding:12px; margin:6px 0; font-size:16px; }
-button { background: gold; color:black; font-weight:bold; }
-.card { background:#151515; padding:15px; border-radius:10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShadowPoint Case OS</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+      margin: 0;
+      padding: 15px;
+    }
+    .card {
+      background: #151515;
+      border: 1px solid #2c2c2c;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    h1, h2, h3 { margin-top: 0; }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      box-sizing: border-box;
+    }
+    input, select, textarea {
+      background: #0f0f0f;
+      color: #fff;
+    }
+    button {
+      background: #c9a44c;
+      color: #111;
+      font-weight: bold;
+      border: none;
+    }
+    .secondary {
+      background: #2a2a2a;
+      color: #fff;
+    }
+    .hidden {
+      display: none;
+    }
+    .case {
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .muted {
+      color: #bbb;
+      font-size: 14px;
+    }
+    .ok {
+      color: #8be28b;
+    }
+    .bad {
+      color: #ff7b7b;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="card">
-<h2>DEBUG DASHBOARD</h2>
-<p>If you see this, GitHub updated correctly.</p>
-</div>
+  <div class="card">
+    <h1>SHADOWPOINT CASE OS</h1>
+    <div id="sessionStatus" class="muted">Checking session...</div>
+  </div>
 
-<div class="card">
-<h3>Login</h3>
+  <div id="loginCard" class="card">
+    <h2>Admin Login</h2>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="loginBtn">Sign In</button>
+    <button id="magicBtn" class="secondary">Send Magic Link</button>
+    <div id="loginMsg" class="muted"></div>
+  </div>
 
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-
-<button onclick="login()">Sign In</button>
-<button onclick="magic()">Magic Link</button>
-
-<p id="msg"></p>
-</div>
+  <div id="appCard" class="card hidden">
+    <h2>Cases</h2>
+    <button id="refreshBtn" class="secondary">Refresh Cases</button>
+    <button id="logoutBtn" class="secondary">Log Out</button>
+    <div id="loadMsg" class="muted"></div>
+    <div id="cases"></div>
+  </div>
 
 <script>
 const supabase = window.supabase.createClient(
-"https://hulcxftmoazrvkjqqyuk.supabase.co",
-"sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T"
+  "https://hulcxftmoazrvkjqqyuk.supabase.co",
+  "sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T"
 );
 
-alert("DEBUG PAGE LOADED");
+const sessionStatus = document.getElementById("sessionStatus");
+const loginCard = document.getElementById("loginCard");
+const appCard = document.getElementById("appCard");
+const loginMsg = document.getElementById("loginMsg");
+const loadMsg = document.getElementById("loadMsg");
+const casesDiv = document.getElementById("cases");
 
-async function login(){
-alert("LOGIN CLICKED");
-
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
-
-const { error } = await supabase.auth.signInWithPassword({
-email,
-password
-});
-
-if(error){
-alert("LOGIN FAILED: " + error.message);
-document.getElementById("msg").innerText = error.message;
-}else{
-alert("LOGIN SUCCESS");
-document.getElementById("msg").innerText = "Logged in";
-}
+function showLoggedOut() {
+  sessionStatus.textContent = "Not signed in";
+  loginCard.classList.remove("hidden");
+  appCard.classList.add("hidden");
 }
 
-async function magic(){
-alert("MAGIC CLICKED");
-
-const email = document.getElementById("email").value;
-
-const { error } = await supabase.auth.signInWithOtp({
-email,
-options: {
-emailRedirectTo: "https://kyleyarbro.github.io/SPDB/"
+function showLoggedIn(email) {
+  sessionStatus.textContent = "Signed in: " + email;
+  loginCard.classList.add("hidden");
+  appCard.classList.remove("hidden");
 }
-});
 
-if(error){
-alert("MAGIC FAILED: " + error.message);
-}else{
-alert("MAGIC SENT");
+async function checkSession() {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      sessionStatus.textContent = "SESSION ERROR: " + error.message;
+      sessionStatus.className = "bad";
+      showLoggedOut();
+      return;
+    }
+
+    const session = data.session;
+    if (session && session.user) {
+      showLoggedIn(session.user.email);
+      await loadCases();
+    } else {
+      showLoggedOut();
+    }
+  } catch (err) {
+    sessionStatus.textContent = "SESSION CRASH: " + err.message;
+    sessionStatus.className = "bad";
+    showLoggedOut();
+  }
 }
+
+async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    loginMsg.textContent = "Enter email and password.";
+    loginMsg.className = "bad";
+    return;
+  }
+
+  loginMsg.textContent = "Signing in...";
+  loginMsg.className = "muted";
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      loginMsg.textContent = "LOGIN FAILED: " + error.message;
+      loginMsg.className = "bad";
+      return;
+    }
+
+    loginMsg.textContent = "Login success.";
+    loginMsg.className = "ok";
+
+    if (data.user) {
+      showLoggedIn(data.user.email);
+    }
+
+    await checkSession();
+  } catch (err) {
+    loginMsg.textContent = "LOGIN CRASH: " + err.message;
+    loginMsg.className = "bad";
+  }
 }
+
+async function sendMagicLink() {
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    loginMsg.textContent = "Enter your email first.";
+    loginMsg.className = "bad";
+    return;
+  }
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: "https://kyleyarbro.github.io/SPDB/"
+    }
+  });
+
+  if (error) {
+    loginMsg.textContent = "MAGIC LINK FAILED: " + error.message;
+    loginMsg.className = "bad";
+    return;
+  }
+
+  loginMsg.textContent = "Magic link sent.";
+  loginMsg.className = "ok";
+}
+
+function normalizeCase(row, table) {
+  return {
+    id: row.id,
+    table,
+    name: row.defendant_name || row.name || "(No name)",
+    status: row.status || "Open",
+    county: row.county || "",
+    assigned_agent: row.assigned_agent || "",
+    admin_notes: row.admin_notes || "",
+    created_at: row.created_at || ""
+  };
+}
+
+async function loadCases() {
+  loadMsg.textContent = "Loading cases...";
+  loadMsg.className = "muted";
+  casesDiv.innerHTML = "";
+
+  try {
+    const [bailRes, recoveryRes] = await Promise.all([
+      supabase.from("bail_intakes").select("*").order("created_at", { ascending: false }),
+      supabase.from("recovery_requests").select("*").order("created_at", { ascending: false })
+    ]);
+
+    if (bailRes.error) {
+      loadMsg.textContent = "Bail load failed: " + bailRes.error.message;
+      loadMsg.className = "bad";
+      return;
+    }
+
+    if (recoveryRes.error) {
+      loadMsg.textContent = "Recovery load failed: " + recoveryRes.error.message;
+      loadMsg.className = "bad";
+      return;
+    }
+
+    const allCases = [
+      ...(bailRes.data || []).map(row => normalizeCase(row, "bail_intakes")),
+      ...(recoveryRes.data || []).map(row => normalizeCase(row, "recovery_requests"))
+    ];
+
+    if (!allCases.length) {
+      loadMsg.textContent = "No cases found yet.";
+      return;
+    }
+
+    loadMsg.textContent = "Loaded " + allCases.length + " case(s).";
+    loadMsg.className = "ok";
+
+    allCases.forEach(item => {
+      const box = document.createElement("div");
+      box.className = "case";
+      box.innerHTML = `
+        <h3>${item.name}</h3>
+        <div class="muted">Table: ${item.table}</div>
+        <div class="muted">Created: ${item.created_at}</div>
+        <div class="muted">Status: ${item.status}</div>
+        <div class="muted">County: ${item.county}</div>
+        <div class="muted">Agent: ${item.assigned_agent}</div>
+        <div class="muted">Notes: ${item.admin_notes || "(none)"}</div>
+      `;
+      casesDiv.appendChild(box);
+    });
+  } catch (err) {
+    loadMsg.textContent = "LOAD CRASH: " + err.message;
+    loadMsg.className = "bad";
+  }
+}
+
+async function logout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    sessionStatus.textContent = "LOGOUT FAILED: " + error.message;
+    sessionStatus.className = "bad";
+    return;
+  }
+  showLoggedOut();
+}
+
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("magicBtn").addEventListener("click", sendMagicLink);
+document.getElementById("refreshBtn").addEventListener("click", loadCases);
+document.getElementById("logoutBtn").addEventListener("click", logout);
+
+checkSession();
 </script>
-
 </body>
 </html>
