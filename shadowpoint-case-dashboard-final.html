@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShadowPoint Case OS</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+      margin: 0;
+      padding: 15px;
+    }
+    .card {
+      background: #151515;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      font-size: 16px;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+    input, select, textarea {
+      background: #101010;
+      color: #fff;
+      border: 1px solid #333;
+    }
+    button {
+      border: none;
+      background: #c9a44c;
+      color: #111;
+      font-weight: bold;
+    }
+    .secondary {
+      background: #2b2b2b;
+      color: #fff;
+    }
+    .muted {
+      color: #bbb;
+    }
+    .ok {
+      color: #89e289;
+      font-weight: bold;
+    }
+    .bad {
+      color: #ff7a7a;
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    .grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .case {
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+      background: #111;
+    }
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #232323;
+      color: #ddd;
+      font-size: 12px;
+      margin-left: 6px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #bbb;
+      margin-top: 8px;
+    }
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>SHADOWPOINT CASE OS</h1>
+    <div id="sessionStatus" class="muted">Loading...</div>
+  </div>
+
+  <div id="loginCard" class="card">
+    <h2>Admin Login</h2>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="doLogin()">Sign In</button>
+    <button class="secondary" onclick="checkSession()">Check Session</button>
+    <button class="secondary" onclick="doLogout()">Log Out</button>
+    <div id="loginMsg" class="muted">Waiting.</div>
+  </div>
+
+  <div id="appCard" class="hidden">
+    <div class="card">
+      <div class="grid">
+        <button class="secondary" onclick="loadCases()">Refresh Cases</button>
+        <button class="secondary" onclick="doLogout()">Log Out</button>
+      </div>
+      <input id="search" placeholder="Search by name, county, status, agent">
+      <div id="loadMsg" class="muted">No data loaded yet.</div>
+    </div>
+
+    <div id="cases"></div>
+  </div>
+
+  <script>
+    var SUPABASE_URL = 'https://hulcxftmoazrvkjqqyuk.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T';
+    var client = null;
+    var allCases = [];
+
+    var sessionStatus = document.getElementById('sessionStatus');
+    var loginCard = document.getElementById('loginCard');
+    var appCard = document.getElementById('appCard');
+    var loginMsg = document.getElementById('loginMsg');
+    var loadMsg = document.getElementById('loadMsg');
+    var casesEl = document.getElementById('cases');
+    var searchEl = document.getElementById('search');
+
+    function esc(v) {
+      return String(v || '').replace(/[&<>"']/g, function(s) {
+        return ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        })[s];
+      });
+    }
+
+    function initSupabase() {
+      if (!window.supabase) {
+        sessionStatus.textContent = 'Supabase script did not load.';
+        sessionStatus.className = 'bad';
+        return false;
+      }
+      try {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        return true;
+      } catch (e) {
+        sessionStatus.textContent = 'Supabase setup failed: ' + e.message;
+        sessionStatus.className = 'bad';
+        return false;
+      }
+    }
+
+    function showLoggedOut() {
+      loginCard.classList.remove('hidden');
+      appCard.classList.add('hidden');
+      sessionStatus.textContent = 'Not signed in';
+      sessionStatus.className = 'muted';
+    }
+
+    function showLoggedIn(email) {
+      loginCard.classList.add('hidden');
+      appCard.classList.remove('hidden');
+      sessionStatus.textContent = 'Signed in: ' + email;
+      sessionStatus.className = 'ok';
+    }
+
+    function setLoginMsg(text, cls) {
+      loginMsg.textContent = text;
+      loginMsg.className = cls || 'muted';
+    }
+
+    function setLoadMsg(text, cls) {
+      loadMsg.textContent = text;
+      loadMsg.className = cls || 'muted';
+    }
+
+    async function doLogin() {
+      if (!client) {
+        setLoginMsg('Supabase is not ready.', 'bad');
+        return;
+      }
+
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        setLoginMsg('Enter email and password.', 'bad');
+        return;
+      }
+
+      setLoginMsg('Trying login...', 'muted');
+
+      try {
+        var result = await client.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (result.error) {
+          setLoginMsg('Login failed: ' + result.error.message, 'bad');
+          return;
+        }
+
+        setLoginMsg('Login success.', 'ok');
+        await checkSession();
+      } catch (e) {
+        setLoginMsg('Login crash: ' + e.message, 'bad');
+      }
+    }
+
+    async function checkSession() {
+      if (!client) {
+        setLoginMsg('Supabase is not ready.', 'bad');
+        return;
+      }
+
+      try {
+        var result = await client.auth.getSession();
+
+        if (result.error) {
+          sessionStatus.textContent = 'Session error: ' + result.error.message;
+          sessionStatus.className = 'bad';
+          showLoggedOut();
+          return;
+        }
+
+        if (result.data.session && result.data.session.user) {
+          showLoggedIn(result.data.session.user.email);
+          await loadCases();
+        } else {
+          showLoggedOut();
+        }
+      } catch (e) {
+        sessionStatus.textContent = 'Session crash: ' + e.message;
+        sessionStatus.className = 'bad';
+        showLoggedOut();
+      }
+    }
+
+    async function doLogout() {
+      if (!client) return;
+
+      var result = await client.auth.signOut();
+
+      if (result.error) {
+        sessionStatus.textContent = 'Logout failed: ' + result.error.message;
+        sessionStatus.className = 'bad';
+        return;
+      }
+
+      allCases = [];
+      casesEl.innerHTML = '';
+      setLoadMsg('Logged out.', 'muted');
+      setLoginMsg('Logged out.', 'muted');
+      showLoggedOut();
+    }
+
+    function normalizeCase(row, table) {
+      return {
+        id: row.id,
+        table: table,
+        name: row.defendant_name || row.name || '(No name)',
+        status: row.status || 'Open',
+        county: row.county || '',
+        assigned_agent: row.assigned_agent || '',
+        priority: row.priority || '',
+        next_action: row.next_action || '',
+        admin_notes: row.admin_notes || '',
+        watchlist: !!row.watchlist,
+        created_at: row.created_at || ''
+      };
+    }
+
+    async function loadCases() {
+      if (!client) {
+        setLoadMsg('Supabase is not ready.', 'bad');
+        return;
+      }
+
+      setLoadMsg('Loading cases...', 'muted');
+      casesEl.innerHTML = '';
+
+      try {
+        var bailRes = await client
+          .from('bail_intakes')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (bailRes.error) {
+          setLoadMsg('Bail load failed: ' + bailRes.error.message, 'bad');
+          return;
+        }
+
+        var recoveryRes = await client
+          .from('recovery_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (recoveryRes.error) {
+          setLoadMsg('Recovery load failed: ' + recoveryRes.error.message, 'bad');
+          return;
+        }
+
+        allCases = []
+          .concat((bailRes.data || []).map(function(r) { return normalizeCase(r, 'bail_intakes'); }))
+          .concat((recoveryRes.data || []).map(function(r) { return normalizeCase(r, 'recovery_requests'); }));
+
+        renderCases(allCases);
+      } catch (e) {
+        setLoadMsg('Load crash: ' + e.message, 'bad');
+      }
+    }
+
+    function renderCases(list) {
+      casesEl.innerHTML = '';
+
+      if (!list.length) {
+        setLoadMsg('No cases found.', 'muted');
+        return;
+      }
+
+      setLoadMsg('Loaded ' + list.length + ' case(s).', 'ok');
+
+      list.forEach(function(item) {
+        var div = document.createElement('div');
+        div.className = 'case';
+
+        div.innerHTML =
+          '<h3>' + esc(item.name) + '<span class="pill">' + esc(item.table) + '</span><span class="pill">' + esc(item.status) + '</span></h3>' +
+          '<div class="muted">Created: ' + esc(item.created_at) + '</div>' +
+
+          '<label>Status</label>' +
+          '<select class="field-status">' +
+            '<option' + (item.status === 'Open' ? ' selected' : '') + '>Open</option>' +
+            '<option' + (item.status === 'In Recovery' ? ' selected' : '') + '>In Recovery</option>' +
+            '<option' + (item.status === 'Missed Court' ? ' selected' : '') + '>Missed Court</option>' +
+            '<option' + (item.status === 'Missed Payment' ? ' selected' : '') + '>Missed Payment</option>' +
+            '<option' + (item.status === 'Closed' ? ' selected' : '') + '>Closed</option>' +
+          '</select>' +
+
+          '<label>Priority</label>' +
+          '<input class="field-priority" value="' + esc(item.priority) + '">' +
+
+          '<label>Assigned Agent</label>' +
+          '<input class="field-agent" value="' + esc(item.assigned_agent) + '">' +
+
+          '<label>County</label>' +
+          '<input class="field-county" value="' + esc(item.county) + '">' +
+
+          '<label>Next Action</label>' +
+          '<input class="field-next" value="' + esc(item.next_action) + '">' +
+
+          '<label>Watchlist</label>' +
+          '<select class="field-watchlist">' +
+            '<option value="false"' + (!item.watchlist ? ' selected' : '') + '>No</option>' +
+            '<option value="true"' + (item.watchlist ? ' selected' : '') + '>Yes</option>' +
+          '</select>' +
+
+          '<label>Admin Notes</label>' +
+          '<textarea class="field-notes" rows="4">' + esc(item.admin_notes) + '</textarea>' +
+
+          '<button onclick="saveCase(this,\'' + esc(item.table) + '\',\'' + esc(item.id) + '\')">Save</button>' +
+          '<div class="saveMsg muted">Waiting.</div>';
+
+        casesEl.appendChild(div);
+      });
+    }
+
+    async function saveCase(button, table, id) {
+      var card = button.closest('.case');
+      var msg = card.querySelector('.saveMsg');
+
+      var payload = {
+        status: card.querySelector('.field-status').value,
+        priority: card.querySelector('.field-priority').value,
+        assigned_agent: card.querySelector('.field-agent').value,
+        county: card.querySelector('.field-county').value,
+        next_action: card.querySelector('.field-next').value,
+        watchlist: card.querySelector('.field-watchlist').value === 'true',
+        admin_notes: card.querySelector('.field-notes').value
+      };
+
+      msg.textContent = 'Saving...';
+      msg.className = 'saveMsg muted';
+
+      var result = await client.from(table).update(payload).eq('id', id);
+
+      if (result.error) {
+        msg.textContent = 'Save failed: ' + result.error.message;
+        msg.className = 'saveMsg bad';
+        return;
+      }
+
+      msg.textContent = 'Saved.';
+      msg.className = 'saveMsg ok';
+    }
+
+    searchEl.addEventListener('input', function() {
+      var q = searchEl.value.toLowerCase().trim();
+
+      if (!q) {
+        renderCases(allCases);
+        return;
+      }
+
+      var filtered = allCases.filter(function(item) {
+        var hay = [
+          item.name,
+          item.county,
+          item.status,
+          item.assigned_agent,
+          item.priority,
+          item.next_action,
+          item.admin_notes,
+          item.table
+        ].join(' ').toLowerCase();
+
+        return hay.indexOf(q) !== -1;
+      });
+
+      renderCases(filtered);
+    });
+
+    window.doLogin = doLogin;
+    window.checkSession = checkSession;
+    window.doLogout = doLogout;
+    window.loadCases = loadCases;
+    window.saveCase = saveCase;
+
+    if (initSupabase()) {
+      checkSession();
+    }
+  </script>
+</body>
+</html>
