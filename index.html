@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,10 +83,7 @@
       letter-spacing: 0.03em;
     }
 
-    .brand-copy .muted {
-      margin-top: 2px;
-    }
-
+    .brand-copy .muted { margin-top: 2px; }
     .muted { color: var(--muted); }
     .ok { color: var(--ok); font-weight: bold; }
     .bad { color: var(--bad); font-weight: bold; }
@@ -135,20 +133,10 @@
       cursor: pointer;
     }
 
-    button:hover {
-      filter: brightness(1.04);
-    }
+    button:hover { filter: brightness(1.04); }
 
-    .secondary {
-      background: #262626;
-      color: #fff;
-    }
-
-    .danger {
-      background: #5e1f1f;
-      color: #fff;
-    }
-
+    .secondary { background: #262626; color: #fff; }
+    .danger { background: #5e1f1f; color: #fff; }
     .ghost {
       background: transparent;
       color: var(--text);
@@ -164,9 +152,7 @@
       letter-spacing: 0.04em;
     }
 
-    .field-block {
-      min-width: 0;
-    }
+    .field-block { min-width: 0; }
 
     .stats {
       display: flex;
@@ -222,13 +208,9 @@
       cursor: pointer;
     }
 
-    .case-header:hover {
-      background: rgba(255,255,255,0.02);
-    }
-
-    .case-header .summary-main {
-      min-width: 0;
-    }
+    .case-header:hover { background: rgba(255,255,255,0.02); }
+    .case-header .summary-main,
+    .case-header .summary-cell { min-width: 0; }
 
     .case-header .summary-main strong,
     .case-header .summary-cell strong {
@@ -278,9 +260,7 @@
       background: #0e0e0e;
     }
 
-    .case-body.hidden {
-      display: none !important;
-    }
+    .case-body.hidden { display: none !important; }
 
     .section-title {
       font-size: 13px;
@@ -303,15 +283,8 @@
       margin-top: 14px;
     }
 
-    .form-actions button {
-      flex: 1 1 180px;
-    }
-
-    .saveMsg {
-      margin-top: 10px;
-      min-height: 18px;
-      font-size: 14px;
-    }
+    .form-actions button { flex: 1 1 180px; }
+    .saveMsg { margin-top: 10px; min-height: 18px; font-size: 14px; }
 
     .small-note {
       font-size: 12px;
@@ -342,7 +315,6 @@
       flex-wrap: wrap;
     }
 
-
     .photo-toolbar {
       display: flex;
       gap: 10px;
@@ -351,9 +323,7 @@
       margin-top: 12px;
     }
 
-    .photo-toolbar .field-block {
-      flex: 1 1 280px;
-    }
+    .photo-toolbar .field-block { flex: 1 1 280px; }
 
     .photo-grid {
       display: grid;
@@ -425,21 +395,10 @@
         grid-template-columns: 1fr;
       }
 
-      .case-header {
-        padding-bottom: 10px;
-      }
-
-      .summary-actions {
-        justify-content: space-between;
-      }
-
-      .form-actions {
-        flex-direction: column;
-      }
-
-      body {
-        padding: 10px;
-      }
+      .case-header { padding-bottom: 10px; }
+      .summary-actions { justify-content: space-between; }
+      .form-actions { flex-direction: column; }
+      body { padding: 10px; }
     }
   </style>
 </head>
@@ -455,8 +414,8 @@
           </div>
         </div>
         <div class="inline-actions">
-          <button class="secondary" onclick="checkSession()">Check Session</button>
-          <button class="secondary" onclick="doLogout()">Log Out</button>
+          <button class="secondary" id="btnCheckSessionTop" type="button">Check Session</button>
+          <button class="secondary" id="btnLogoutTop" type="button">Log Out</button>
         </div>
       </div>
     </div>
@@ -465,18 +424,18 @@
       <h2>Admin Login</h2>
       <div class="grid">
         <div class="field-block">
-          <label>Email</label>
+          <label for="email">Email</label>
           <input id="email" type="email" placeholder="Email">
         </div>
         <div class="field-block">
-          <label>Password</label>
+          <label for="password">Password</label>
           <input id="password" type="password" placeholder="Password">
         </div>
       </div>
       <div class="login-actions">
-        <button onclick="doLogin()">Sign In</button>
-        <button class="secondary" onclick="checkSession()">Check Session</button>
-        <button class="secondary" onclick="doLogout()">Log Out</button>
+        <button id="btnLogin" type="button">Sign In</button>
+        <button class="secondary" id="btnCheckSessionLogin" type="button">Check Session</button>
+        <button class="secondary" id="btnLogoutLogin" type="button">Log Out</button>
       </div>
       <div id="loginMsg" class="muted" style="margin-top:10px;">Waiting.</div>
     </div>
@@ -489,8 +448,8 @@
             <div class="muted">Collapsed list view first. Expand any case to edit the full file.</div>
           </div>
           <div class="inline-actions">
-            <button onclick="toggleAddForm()">Add New Defendant</button>
-            <button class="secondary" onclick="loadCases()">Refresh Cases</button>
+            <button id="btnToggleAddForm" type="button">Add New Defendant</button>
+            <button class="secondary" id="btnRefreshCases" type="button">Refresh Cases</button>
           </div>
         </div>
 
@@ -509,7 +468,7 @@
             <option>Missed Payment</option>
             <option>Closed</option>
           </select>
-          <button class="secondary" onclick="clearFilters()">Clear Filters</button>
+          <button class="secondary" id="btnClearFilters" type="button">Clear Filters</button>
         </div>
 
         <div id="loadMsg" class="muted" style="margin-top:10px;">No data loaded yet.</div>
@@ -526,28 +485,31 @@
         <div class="header-row">
           <div>
             <h3 style="margin-bottom:6px;">Add New Defendant</h3>
-            <div class="muted">Add from this same screen. New records use the schema detected from the selected table.</div>
+            <div class="muted">Add from this same screen. New records use the selected table.</div>
           </div>
           <div class="inline-actions">
-            <button class="ghost" onclick="toggleAddForm()">Close</button>
+            <button class="ghost" id="btnCloseAddForm" type="button">Close</button>
           </div>
         </div>
 
         <div class="grid-4">
           <div class="field-block">
-            <label>Target Table</label>
-            <select id="add-table"></select>
+            <label for="add-table">Target Table</label>
+            <select id="add-table">
+              <option value="bail_intakes">bail_intakes</option>
+              <option value="recovery_requests">recovery_requests</option>
+            </select>
           </div>
           <div class="field-block">
-            <label>Name</label>
+            <label for="add-name">Name</label>
             <input id="add-name" data-field="name" placeholder="Defendant name">
           </div>
           <div class="field-block">
-            <label>Court Date</label>
+            <label for="add-court-date">Court Date</label>
             <input id="add-court-date" data-field="court_date" type="date">
           </div>
           <div class="field-block">
-            <label>Case Number</label>
+            <label for="add-case-number">Case Number</label>
             <input id="add-case-number" data-field="case_number" placeholder="Case number">
           </div>
         </div>
@@ -556,15 +518,16 @@
 
         <div class="section-title">Defendant</div>
         <div class="grid-4">
-          <div class="field-block"><label>DOB</label><input id="add-dob" data-field="dob" type="date"></div>
-          <div class="field-block"><label>Charges</label><input id="add-charges" data-field="charges" placeholder="Charges"></div>
-          <div class="field-block"><label>Phone Number</label><input id="add-phone" data-field="phone" placeholder="Phone"></div>
-          <div class="field-block"><label>Address</label><input id="add-address" data-field="address" placeholder="Address"></div>
-          <div class="field-block"><label>Race</label><input id="add-race" data-field="race" placeholder="Race"></div>
-          <div class="field-block"><label>Sex</label><input id="add-sex" data-field="sex" placeholder="Sex"></div>
-          <div class="field-block"><label>Height</label><input id="add-height" data-field="height" placeholder="Height"></div>
-          <div class="field-block"><label>Weight</label><input id="add-weight" data-field="weight" placeholder="Weight"></div>
-          <div class="field-block"><label>Status</label>
+          <div class="field-block"><label for="add-dob">DOB</label><input id="add-dob" data-field="dob" type="date"></div>
+          <div class="field-block"><label for="add-charges">Charges</label><input id="add-charges" data-field="charges" placeholder="Charges"></div>
+          <div class="field-block"><label for="add-phone">Phone Number</label><input id="add-phone" data-field="phone" placeholder="Phone"></div>
+          <div class="field-block"><label for="add-address">Address</label><input id="add-address" data-field="address" placeholder="Address"></div>
+          <div class="field-block"><label for="add-race">Race</label><input id="add-race" data-field="race" placeholder="Race"></div>
+          <div class="field-block"><label for="add-sex">Sex</label><input id="add-sex" data-field="sex" placeholder="Sex"></div>
+          <div class="field-block"><label for="add-height">Height</label><input id="add-height" data-field="height" placeholder="Height"></div>
+          <div class="field-block"><label for="add-weight">Weight</label><input id="add-weight" data-field="weight" placeholder="Weight"></div>
+          <div class="field-block">
+            <label for="add-status">Status</label>
             <select id="add-status" data-field="status">
               <option>Open</option>
               <option>In Recovery</option>
@@ -573,13 +536,14 @@
               <option>Closed</option>
             </select>
           </div>
-          <div class="field-block"><label>Bond Amount</label><input id="add-bond-amount" data-field="bond_amount" placeholder="Bond amount"></div>
-          <div class="field-block"><label>Premium Amount</label><input id="add-premium-amount" data-field="premium_amount" placeholder="Premium amount"></div>
-          <div class="field-block"><label>County Jail</label><input id="add-county-jail" data-field="county_jail" placeholder="County jail"></div>
-          <div class="field-block"><label>County</label><input id="add-county" data-field="county" placeholder="County"></div>
-          <div class="field-block"><label>Assigned Agent</label><input id="add-assigned-agent" data-field="assigned_agent" placeholder="Assigned agent"></div>
-          <div class="field-block"><label>Priority</label><input id="add-priority" data-field="priority" placeholder="Priority"></div>
-          <div class="field-block"><label>Watchlist</label>
+          <div class="field-block"><label for="add-bond-amount">Bond Amount</label><input id="add-bond-amount" data-field="bond_amount" placeholder="Bond amount"></div>
+          <div class="field-block"><label for="add-premium-amount">Premium Amount</label><input id="add-premium-amount" data-field="premium_amount" placeholder="Premium amount"></div>
+          <div class="field-block"><label for="add-county-jail">County Jail</label><input id="add-county-jail" data-field="county_jail" placeholder="County jail"></div>
+          <div class="field-block"><label for="add-county">County</label><input id="add-county" data-field="county" placeholder="County"></div>
+          <div class="field-block"><label for="add-assigned-agent">Assigned Agent</label><input id="add-assigned-agent" data-field="assigned_agent" placeholder="Assigned agent"></div>
+          <div class="field-block"><label for="add-priority">Priority</label><input id="add-priority" data-field="priority" placeholder="Priority"></div>
+          <div class="field-block">
+            <label for="add-watchlist">Watchlist</label>
             <select id="add-watchlist" data-field="watchlist">
               <option value="false">No</option>
               <option value="true">Yes</option>
@@ -591,22 +555,22 @@
 
         <div class="section-title">Co-Signer + Intelligence</div>
         <div class="grid-4">
-          <div class="field-block"><label>Co-Signer Name</label><input id="add-cosigner-name" data-field="cosigner_name" placeholder="Co-signer name"></div>
-          <div class="field-block"><label>Co-Signer Phone</label><input id="add-cosigner-phone" data-field="cosigner_phone" placeholder="Co-signer phone"></div>
-          <div class="field-block"><label>Co-Signer Address</label><input id="add-cosigner-address" data-field="cosigner_address" placeholder="Co-signer address"></div>
-          <div class="field-block"><label>Relationship</label><input id="add-cosigner-relationship" data-field="cosigner_relationship" placeholder="Relationship"></div>
-          <div class="field-block"><label>Prior Charges</label><input id="add-prior-charges" data-field="prior_charges" placeholder="Prior charges"></div>
-          <div class="field-block"><label>Next Action</label><input id="add-next-action" data-field="next_action" placeholder="Next action"></div>
-          <div class="field-block"><label>Employer</label><input id="add-employer" data-field="employer" placeholder="Employer"></div>
-          <div class="field-block"><label>Vehicle</label><input id="add-vehicle" data-field="vehicle" placeholder="Vehicle"></div>
+          <div class="field-block"><label for="add-cosigner-name">Co-Signer Name</label><input id="add-cosigner-name" data-field="cosigner_name" placeholder="Co-signer name"></div>
+          <div class="field-block"><label for="add-cosigner-phone">Co-Signer Phone</label><input id="add-cosigner-phone" data-field="cosigner_phone" placeholder="Co-signer phone"></div>
+          <div class="field-block"><label for="add-cosigner-address">Co-Signer Address</label><input id="add-cosigner-address" data-field="cosigner_address" placeholder="Co-signer address"></div>
+          <div class="field-block"><label for="add-cosigner-relationship">Relationship</label><input id="add-cosigner-relationship" data-field="cosigner_relationship" placeholder="Relationship"></div>
+          <div class="field-block"><label for="add-prior-charges">Prior Charges</label><input id="add-prior-charges" data-field="prior_charges" placeholder="Prior charges"></div>
+          <div class="field-block"><label for="add-next-action">Next Action</label><input id="add-next-action" data-field="next_action" placeholder="Next action"></div>
+          <div class="field-block"><label for="add-employer">Employer</label><input id="add-employer" data-field="employer" placeholder="Employer"></div>
+          <div class="field-block"><label for="add-vehicle">Vehicle</label><input id="add-vehicle" data-field="vehicle" placeholder="Vehicle"></div>
         </div>
         <div class="field-block" style="margin-top:10px;">
-          <label>Admin Notes</label>
+          <label for="add-admin-notes">Admin Notes</label>
           <textarea id="add-admin-notes" data-field="admin_notes" placeholder="Notes, instructions, skip intel, known locations, work hours, socials, tattoos, aliases, hazards"></textarea>
         </div>
         <div class="form-actions">
-          <button onclick="createCase()">Create Defendant</button>
-          <button class="secondary" onclick="resetAddForm()">Reset Form</button>
+          <button id="btnCreateCase" type="button">Create Defendant</button>
+          <button class="secondary" id="btnResetAddForm" type="button">Reset Form</button>
         </div>
         <div id="addMsg" class="saveMsg muted">Waiting.</div>
         <div class="small-note">
@@ -619,911 +583,993 @@
   </div>
 
   <script>
-    var SUPABASE_URL = 'https://hulcxftmoazrvkjqqyuk.supabase.co';
-    var SUPABASE_KEY = 'sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T';
-    var PHOTO_BUCKET = 'case-photos';
-    var client = null;
-    var allCases = [];
-    var schemaByTable = {};
-    var expandedState = {};
+    (function () {
+      const SUPABASE_URL = 'https://hulcxftmoazrvkjqqyuk.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_yFa3GaBBsHYn-VfK8ivRJQ__vuu_q2T';
+      const PHOTO_BUCKET = 'case-photos';
+      const TABLES = ['bail_intakes', 'recovery_requests'];
+      const STATUS_OPTIONS = ['Open', 'In Recovery', 'Missed Court', 'Missed Payment', 'Closed'];
 
-    var STATUS_OPTIONS = ['Open', 'In Recovery', 'Missed Court', 'Missed Payment', 'Closed'];
+      let client = null;
+      let allCases = [];
+      let expandedState = {};
+      const schemaByTable = {
+        bail_intakes: [],
+        recovery_requests: []
+      };
 
-    var FIELD_DEFS = [
-      { key: 'name', label: 'Name', aliases: ['defendant_name', 'name', 'full_name'] },
-      { key: 'dob', label: 'DOB', aliases: ['dob', 'date_of_birth', 'birth_date'], type: 'date' },
-      { key: 'case_number', label: 'Case Number', aliases: ['case_number', 'case_no', 'case_num', 'court_case_number', 'file_number'] },
-      { key: 'court_date', label: 'Court Date', aliases: ['court_date', 'next_court_date', 'appearance_date'], type: 'date' },
-      { key: 'charges', label: 'Charges', aliases: ['charges', 'charge', 'charge_description'] },
-      { key: 'address', label: 'Address', aliases: ['address', 'home_address', 'street_address'] },
-      { key: 'phone', label: 'Phone Number', aliases: ['phone', 'phone_number', 'defendant_phone', 'mobile'] },
-      { key: 'race', label: 'Race', aliases: ['race'] },
-      { key: 'sex', label: 'Sex', aliases: ['sex', 'gender'] },
-      { key: 'height', label: 'Height', aliases: ['height'] },
-      { key: 'weight', label: 'Weight', aliases: ['weight'] },
-      { key: 'cosigner_name', label: 'Co-Signer Name', aliases: ['cosigner_name', 'co_signer_name', 'cosigner', 'indemnitor_name'] },
-      { key: 'cosigner_phone', label: 'Co-Signer Phone Number', aliases: ['cosigner_phone', 'co_signer_phone', 'indemnitor_phone'] },
-      { key: 'cosigner_address', label: 'Co-Signer Address', aliases: ['cosigner_address', 'co_signer_address', 'indemnitor_address'] },
-      { key: 'cosigner_relationship', label: 'Relationship', aliases: ['cosigner_relationship', 'co_signer_relationship', 'relationship', 'indemnitor_relationship'] },
-      { key: 'status', label: 'Status', aliases: ['status'], type: 'status' },
-      { key: 'bond_amount', label: 'Bond Amount', aliases: ['bond_amount', 'bond', 'bond_total'] },
-      { key: 'premium_amount', label: 'Premium Amount', aliases: ['premium_amount', 'premium', 'premium_due'] },
-      { key: 'county_jail', label: 'County Jail', aliases: ['county_jail', 'jail', 'jail_name'] },
-      { key: 'prior_charges', label: 'Prior Charges', aliases: ['prior_charges', 'prior_charge_history', 'criminal_history'] },
-      { key: 'county', label: 'County', aliases: ['county'] },
-      { key: 'assigned_agent', label: 'Assigned Agent', aliases: ['assigned_agent', 'agent', 'agent_name'] },
-      { key: 'priority', label: 'Priority', aliases: ['priority'] },
-      { key: 'next_action', label: 'Next Action', aliases: ['next_action', 'action_needed', 'follow_up'] },
-      { key: 'watchlist', label: 'Watchlist', aliases: ['watchlist'], type: 'boolean' },
-      { key: 'employer', label: 'Employer', aliases: ['employer', 'employment', 'job'] },
-      { key: 'vehicle', label: 'Vehicle', aliases: ['vehicle', 'vehicle_info', 'car'] },
-      { key: 'admin_notes', label: 'Admin Notes', aliases: ['admin_notes', 'notes', 'internal_notes'], type: 'textarea' }
-    ];
+      const FIELD_DEFS = [
+        { key: 'name', label: 'Name', aliases: ['name', 'defendant_name', 'full_name'] },
+        { key: 'dob', label: 'DOB', aliases: ['dob', 'date_of_birth', 'birth_date'], type: 'date' },
+        { key: 'case_number', label: 'Case Number', aliases: ['case_number', 'case_no', 'case_num', 'court_case_number', 'file_number'] },
+        { key: 'court_date', label: 'Court Date', aliases: ['court_date', 'next_court_date', 'appearance_date'], type: 'date' },
+        { key: 'charges', label: 'Charges', aliases: ['charges', 'charge', 'charge_description'] },
+        { key: 'address', label: 'Address', aliases: ['address', 'home_address', 'street_address'] },
+        { key: 'phone', label: 'Phone Number', aliases: ['phone', 'phone_number', 'defendant_phone', 'mobile'] },
+        { key: 'race', label: 'Race', aliases: ['race'] },
+        { key: 'sex', label: 'Sex', aliases: ['sex', 'gender'] },
+        { key: 'height', label: 'Height', aliases: ['height'] },
+        { key: 'weight', label: 'Weight', aliases: ['weight'] },
+        { key: 'cosigner_name', label: 'Co-Signer Name', aliases: ['cosigner_name', 'co_signer_name', 'cosigner', 'indemnitor_name'] },
+        { key: 'cosigner_phone', label: 'Co-Signer Phone Number', aliases: ['cosigner_phone', 'co_signer_phone', 'indemnitor_phone'] },
+        { key: 'cosigner_address', label: 'Co-Signer Address', aliases: ['cosigner_address', 'co_signer_address', 'indemnitor_address'] },
+        { key: 'cosigner_relationship', label: 'Relationship', aliases: ['cosigner_relationship', 'co_signer_relationship', 'relationship', 'indemnitor_relationship'] },
+        { key: 'status', label: 'Status', aliases: ['status'], type: 'status' },
+        { key: 'bond_amount', label: 'Bond Amount', aliases: ['bond_amount', 'bond', 'bond_total'], type: 'number' },
+        { key: 'premium_amount', label: 'Premium Amount', aliases: ['premium_amount', 'premium', 'premium_due'], type: 'number' },
+        { key: 'county_jail', label: 'County Jail', aliases: ['county_jail', 'jail', 'jail_name'] },
+        { key: 'prior_charges', label: 'Prior Charges', aliases: ['prior_charges', 'prior_charge_history', 'criminal_history'] },
+        { key: 'county', label: 'County', aliases: ['county'] },
+        { key: 'assigned_agent', label: 'Assigned Agent', aliases: ['assigned_agent', 'agent', 'agent_name'] },
+        { key: 'priority', label: 'Priority', aliases: ['priority'] },
+        { key: 'next_action', label: 'Next Action', aliases: ['next_action', 'action_needed', 'follow_up'] },
+        { key: 'watchlist', label: 'Watchlist', aliases: ['watchlist'], type: 'boolean' },
+        { key: 'employer', label: 'Employer', aliases: ['employer', 'employment', 'job'] },
+        { key: 'vehicle', label: 'Vehicle', aliases: ['vehicle', 'vehicle_info', 'car'] },
+        { key: 'admin_notes', label: 'Admin Notes', aliases: ['admin_notes', 'notes', 'internal_notes'], type: 'textarea' }
+      ];
 
-    var META_FIELDS = [
-      { key: 'table', label: 'Table', readOnly: true },
-      { key: 'created_at', label: 'Created', readOnly: true },
-      { key: 'updated_at', label: 'Updated', readOnly: true }
-    ];
+      const META_FIELDS = [
+        { key: 'table', label: 'Table' },
+        { key: 'created_at', label: 'Created' },
+        { key: 'updated_at', label: 'Updated' }
+      ];
 
-    var sessionStatus = document.getElementById('sessionStatus');
-    var loginCard = document.getElementById('loginCard');
-    var appCard = document.getElementById('appCard');
-    var loginMsg = document.getElementById('loginMsg');
-    var loadMsg = document.getElementById('loadMsg');
-    var casesEl = document.getElementById('cases');
-    var searchEl = document.getElementById('search');
-    var filterTableEl = document.getElementById('filterTable');
-    var filterStatusEl = document.getElementById('filterStatus');
-    var addCard = document.getElementById('addCard');
-    var addMsg = document.getElementById('addMsg');
+      const sessionStatus = document.getElementById('sessionStatus');
+      const loginCard = document.getElementById('loginCard');
+      const appCard = document.getElementById('appCard');
+      const loginMsg = document.getElementById('loginMsg');
+      const loadMsg = document.getElementById('loadMsg');
+      const addMsg = document.getElementById('addMsg');
+      const addCard = document.getElementById('addCard');
+      const casesEl = document.getElementById('cases');
+      const searchEl = document.getElementById('search');
+      const filterTableEl = document.getElementById('filterTable');
+      const filterStatusEl = document.getElementById('filterStatus');
 
-    function esc(v) {
-      return String(v == null ? '' : v).replace(/[&<>"']/g, function(s) {
-        return ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        })[s];
-      });
-    }
+      function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+          return ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          })[char];
+        });
+      }
 
-    function titleCaseKey(key) {
-      return String(key || '')
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, function(m) { return m.toUpperCase(); });
-    }
+      function titleCaseKey(key) {
+        return String(key || '')
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, function (m) { return m.toUpperCase(); });
+      }
 
-    function formatDisplay(value) {
-      if (value == null || value === '') return '';
-      if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-      return String(value);
-    }
+      function formatDisplay(value) {
+        if (value == null || value === '') return '';
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        if (typeof value === 'object') {
+          try { return JSON.stringify(value); } catch (e) { return String(value); }
+        }
+        return String(value);
+      }
 
-    function normalizeDateInput(v) {
-      if (!v) return '';
-      var str = String(v);
-      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-      var d = new Date(str);
-      if (isNaN(d.getTime())) return '';
-      return d.toISOString().slice(0, 10);
-    }
+      function normalizeDateInput(value) {
+        if (!value) return '';
+        const str = String(value);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+        const d = new Date(str);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toISOString().slice(0, 10);
+      }
 
-    function getValueByAliases(row, aliases) {
-      if (!row) return '';
-      for (var i = 0; i < aliases.length; i++) {
-        if (row[aliases[i]] != null && row[aliases[i]] !== '') {
-          return row[aliases[i]];
+      function isNumericField(columnName) {
+        return ['bond_amount', 'premium_amount'].includes(columnName);
+      }
+
+      function getValueByAliases(row, aliases) {
+        if (!row) return '';
+        for (const alias of aliases) {
+          if (row[alias] != null && row[alias] !== '') return row[alias];
+        }
+        return '';
+      }
+
+      function getActualColumn(row, table, aliases) {
+        const schema = schemaByTable[table] || [];
+        if (row) {
+          for (const alias of aliases) {
+            if (Object.prototype.hasOwnProperty.call(row, alias)) return alias;
+          }
+        }
+        for (const alias of aliases) {
+          if (schema.includes(alias)) return alias;
+        }
+        return '';
+      }
+
+      function setLoginMsg(text, cls) {
+        loginMsg.textContent = text;
+        loginMsg.className = cls || 'muted';
+      }
+
+      function setLoadMsg(text, cls) {
+        loadMsg.textContent = text;
+        loadMsg.className = cls || 'muted';
+      }
+
+      function setAddMsg(text, cls) {
+        addMsg.textContent = text;
+        addMsg.className = 'saveMsg ' + (cls || 'muted');
+      }
+
+      function initSupabase() {
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+          sessionStatus.textContent = 'Supabase script did not load.';
+          sessionStatus.className = 'bad';
+          return false;
+        }
+        try {
+          client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+          return true;
+        } catch (error) {
+          sessionStatus.textContent = 'Supabase setup failed: ' + error.message;
+          sessionStatus.className = 'bad';
+          return false;
         }
       }
-      return '';
-    }
 
-    function getActualColumn(row, table, aliases) {
-      var schema = schemaByTable[table] || [];
-      for (var i = 0; i < aliases.length; i++) {
-        if (row && Object.prototype.hasOwnProperty.call(row, aliases[i])) return aliases[i];
-      }
-      for (var j = 0; j < aliases.length; j++) {
-        if (schema.indexOf(aliases[j]) !== -1) return aliases[j];
-      }
-      return '';
-    }
-
-    function setLoginMsg(text, cls) {
-      loginMsg.textContent = text;
-      loginMsg.className = cls || 'muted';
-    }
-
-    function setLoadMsg(text, cls) {
-      loadMsg.textContent = text;
-      loadMsg.className = cls || 'muted';
-    }
-
-    function setAddMsg(text, cls) {
-      addMsg.textContent = text;
-      addMsg.className = 'saveMsg ' + (cls || 'muted');
-    }
-
-    function initSupabase() {
-      if (!window.supabase) {
-        sessionStatus.textContent = 'Supabase script did not load.';
-        sessionStatus.className = 'bad';
-        return false;
-      }
-      try {
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        return true;
-      } catch (e) {
-        sessionStatus.textContent = 'Supabase setup failed: ' + e.message;
-        sessionStatus.className = 'bad';
-        return false;
-      }
-    }
-
-    function showLoggedOut() {
-      loginCard.classList.remove('hidden');
-      appCard.classList.add('hidden');
-      sessionStatus.textContent = 'Not signed in';
-      sessionStatus.className = 'muted';
-    }
-
-    function showLoggedIn(email) {
-      loginCard.classList.add('hidden');
-      appCard.classList.remove('hidden');
-      sessionStatus.textContent = 'Signed in: ' + email;
-      sessionStatus.className = 'ok';
-    }
-
-    async function doLogin() {
-      if (!client) {
-        setLoginMsg('Supabase is not ready.', 'bad');
-        return;
+      function showLoggedOut() {
+        loginCard.classList.remove('hidden');
+        appCard.classList.add('hidden');
+        sessionStatus.textContent = 'Not signed in';
+        sessionStatus.className = 'muted';
       }
 
-      var email = document.getElementById('email').value.trim();
-      var password = document.getElementById('password').value;
-
-      if (!email || !password) {
-        setLoginMsg('Enter email and password.', 'bad');
-        return;
+      function showLoggedIn(email) {
+        loginCard.classList.add('hidden');
+        appCard.classList.remove('hidden');
+        sessionStatus.textContent = 'Signed in: ' + (email || 'unknown');
+        sessionStatus.className = 'ok';
       }
 
-      setLoginMsg('Trying login...', 'muted');
-
-      try {
-        var result = await client.auth.signInWithPassword({ email: email, password: password });
-        if (result.error) {
-          setLoginMsg('Login failed: ' + result.error.message, 'bad');
+      async function doLogin() {
+        if (!client) {
+          setLoginMsg('Supabase is not ready.', 'bad');
           return;
         }
-        setLoginMsg('Login success.', 'ok');
-        await checkSession();
-      } catch (e) {
-        setLoginMsg('Login crash: ' + e.message, 'bad');
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+          setLoginMsg('Enter email and password.', 'bad');
+          return;
+        }
+
+        setLoginMsg('Trying login...', 'muted');
+
+        try {
+          const result = await client.auth.signInWithPassword({ email, password });
+          if (result.error) {
+            setLoginMsg('Login failed: ' + result.error.message, 'bad');
+            return;
+          }
+          setLoginMsg('Login success.', 'ok');
+          await checkSession();
+        } catch (error) {
+          setLoginMsg('Login crash: ' + error.message, 'bad');
+        }
       }
-    }
 
-    async function checkSession() {
-      if (!client) {
-        setLoginMsg('Supabase is not ready.', 'bad');
-        return;
-      }
+      async function checkSession() {
+        if (!client) {
+          setLoginMsg('Supabase is not ready.', 'bad');
+          return;
+        }
 
-      try {
-        var result = await client.auth.getSession();
+        try {
+          const result = await client.auth.getSession();
+          if (result.error) {
+            sessionStatus.textContent = 'Session error: ' + result.error.message;
+            sessionStatus.className = 'bad';
+            showLoggedOut();
+            return;
+          }
 
-        if (result.error) {
-          sessionStatus.textContent = 'Session error: ' + result.error.message;
+          const session = result.data && result.data.session;
+          if (session && session.user) {
+            showLoggedIn(session.user.email);
+            await loadCases();
+          } else {
+            showLoggedOut();
+          }
+        } catch (error) {
+          sessionStatus.textContent = 'Session crash: ' + error.message;
           sessionStatus.className = 'bad';
           showLoggedOut();
+        }
+      }
+
+      async function doLogout() {
+        if (!client) return;
+        try {
+          const result = await client.auth.signOut();
+          if (result.error) {
+            sessionStatus.textContent = 'Logout failed: ' + result.error.message;
+            sessionStatus.className = 'bad';
+            return;
+          }
+        } catch (error) {
+          sessionStatus.textContent = 'Logout crash: ' + error.message;
+          sessionStatus.className = 'bad';
           return;
         }
 
-        if (result.data.session && result.data.session.user) {
-          showLoggedIn(result.data.session.user.email);
-          await loadCases();
-        } else {
-          showLoggedOut();
-        }
-      } catch (e) {
-        sessionStatus.textContent = 'Session crash: ' + e.message;
-        sessionStatus.className = 'bad';
+        allCases = [];
+        casesEl.innerHTML = '';
+        setLoadMsg('Logged out.', 'muted');
+        setLoginMsg('Logged out.', 'muted');
         showLoggedOut();
       }
-    }
 
-    async function doLogout() {
-      if (!client) return;
-
-      var result = await client.auth.signOut();
-      if (result.error) {
-        sessionStatus.textContent = 'Logout failed: ' + result.error.message;
-        sessionStatus.className = 'bad';
-        return;
+      function safeFileName(name) {
+        const cleaned = String(name || 'photo')
+          .toLowerCase()
+          .replace(/[^a-z0-9._-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        return cleaned || 'photo';
       }
 
-      allCases = [];
-      casesEl.innerHTML = '';
-      setLoadMsg('Logged out.', 'muted');
-      setLoginMsg('Logged out.', 'muted');
-      showLoggedOut();
-    }
-
-
-    function safeFileName(name) {
-      return String(name || 'photo')
-        .toLowerCase()
-        .replace(/[^a-z0-9._-]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'photo';
-    }
-
-    function getPublicPhotoUrl(path) {
-      if (!path) return '';
-      if (/^https?:\/\//i.test(path)) return path;
-      var result = client.storage.from(PHOTO_BUCKET).getPublicUrl(path);
-      return result && result.data ? result.data.publicUrl : '';
-    }
-
-    function extractPhotoPaths(row) {
-      var raw = getValueByAliases(row, ['photo_paths', 'photos', 'image_paths']);
-      if (Array.isArray(raw)) return raw.filter(Boolean);
-      if (raw && typeof raw === 'object') {
-        if (Array.isArray(raw.paths)) return raw.paths.filter(Boolean);
-        return Object.values(raw).filter(Boolean);
+      function getPublicPhotoUrl(path) {
+        if (!path || !client) return '';
+        if (/^https?:\/\//i.test(path)) return path;
+        const result = client.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+        return result && result.data ? result.data.publicUrl : '';
       }
-      if (typeof raw === 'string' && raw.trim()) {
+
+      function extractPhotoPaths(row) {
+        const raw = getValueByAliases(row, ['photo_paths', 'photos', 'image_paths']);
+        if (Array.isArray(raw)) return raw.filter(Boolean);
+        if (raw && typeof raw === 'object') {
+          if (Array.isArray(raw.paths)) return raw.paths.filter(Boolean);
+          return Object.values(raw).filter(Boolean);
+        }
+        if (typeof raw === 'string' && raw.trim()) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed.filter(Boolean);
+          } catch (error) {}
+          return raw.split(/\n|,/).map(function (v) { return v.trim(); }).filter(Boolean);
+        }
+        const single = getValueByAliases(row, ['primary_photo_path', 'primary_photo', 'photo_path']);
+        return single ? [single] : [];
+      }
+
+      function normalizeCase(row, table) {
+        return {
+          id: row.id,
+          table: table,
+          raw: row,
+          name: getValueByAliases(row, ['name', 'defendant_name', 'full_name']) || '(No name)',
+          case_number: getValueByAliases(row, ['case_number', 'case_no', 'case_num', 'court_case_number', 'file_number']),
+          court_date: getValueByAliases(row, ['court_date', 'next_court_date', 'appearance_date']),
+          status: getValueByAliases(row, ['status']) || 'Open',
+          county: getValueByAliases(row, ['county']),
+          phone: getValueByAliases(row, ['phone', 'phone_number', 'defendant_phone', 'mobile']),
+          assigned_agent: getValueByAliases(row, ['assigned_agent', 'agent', 'agent_name']),
+          priority: getValueByAliases(row, ['priority']),
+          next_action: getValueByAliases(row, ['next_action', 'action_needed', 'follow_up']),
+          admin_notes: getValueByAliases(row, ['admin_notes', 'notes', 'internal_notes']),
+          watchlist: !!getValueByAliases(row, ['watchlist']),
+          photo_paths: extractPhotoPaths(row),
+          primary_photo_path: getValueByAliases(row, ['primary_photo_path', 'primary_photo', 'photo_path']),
+          created_at: row.created_at || '',
+          updated_at: row.updated_at || ''
+        };
+      }
+
+      async function fetchTableRows(table) {
+        const result = await client.from(table).select('*').order('created_at', { ascending: false });
+        if (result.error) throw new Error(table + ': ' + result.error.message);
+
+        const rows = Array.isArray(result.data) ? result.data : [];
+        const keySet = new Set(schemaByTable[table] || []);
+        rows.forEach(function (row) {
+          Object.keys(row || {}).forEach(function (key) { keySet.add(key); });
+        });
+        FIELD_DEFS.forEach(function (def) {
+          def.aliases.forEach(function (alias) { if (keySet.has(alias)) keySet.add(alias); });
+        });
+
+        if (keySet.size === 0) {
+          if (table === 'bail_intakes') {
+            [
+              'id','created_at','updated_at','name','phone','defendant_name','bond_amount','status','priority',
+              'assigned_agent','county','next_action','admin_notes','watchlist','dob','case_number','court_date',
+              'charges','address','race','sex','height','weight','cosigner_name','cosigner_phone','cosigner_address',
+              'cosigner_relationship','premium_amount','county_jail','prior_charges','employer','vehicle','aliases',
+              'scars_marks_tattoos','emergency_contact_name','emergency_contact_phone','emergency_contact_relationship',
+              'photo_paths','primary_photo_path'
+            ].forEach(function (col) { keySet.add(col); });
+          } else {
+            [
+              'id','created_at','updated_at','name','phone','defendant_name','bond_amount','status','priority',
+              'assigned_agent','county','next_action','admin_notes','watchlist','dob','case_number','court_date',
+              'charges','address','race','sex','height','weight','cosigner_name','cosigner_phone','cosigner_address',
+              'cosigner_relationship','premium_amount','county_jail','prior_charges','employer','vehicle','aliases',
+              'scars_marks_tattoos','emergency_contact_name','emergency_contact_phone','emergency_contact_relationship',
+              'photo_paths','primary_photo_path','last_seen','last_known_location','case_bond_information',
+              'requester_name_agency','case_notes'
+            ].forEach(function (col) { keySet.add(col); });
+          }
+        }
+
+        schemaByTable[table] = Array.from(keySet);
+        return rows;
+      }
+
+      async function loadCases() {
+        if (!client) {
+          setLoadMsg('Supabase is not ready.', 'bad');
+          return;
+        }
+
+        setLoadMsg('Loading cases...', 'muted');
+        casesEl.innerHTML = '';
+
         try {
-          var parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) return parsed.filter(Boolean);
-        } catch (e) {}
-        return raw.split(/\n|,/).map(function(v) { return v.trim(); }).filter(Boolean);
+          const bailRows = await fetchTableRows('bail_intakes');
+          const recoveryRows = await fetchTableRows('recovery_requests');
+
+          allCases = []
+            .concat(bailRows.map(function (row) { return normalizeCase(row, 'bail_intakes'); }))
+            .concat(recoveryRows.map(function (row) { return normalizeCase(row, 'recovery_requests'); }));
+
+          applyFiltersAndRender();
+        } catch (error) {
+          setLoadMsg('Load failed: ' + error.message, 'bad');
+        }
       }
-      var single = getValueByAliases(row, ['primary_photo_path', 'primary_photo', 'photo_path']);
-      return single ? [single] : [];
-    }
 
-    function renderPhotoSection(item) {
-      var paths = extractPhotoPaths(item.raw);
-      var html = ''
-        + '<div class="divider"></div>'
-        + '<div class="section-title">Photos</div>'
-        + '<div class="photo-toolbar">'
-        +   '<div class="field-block">'
-        +     '<label>Upload Case Photo</label>'
-        +     '<input class="photo-input" type="file" accept="image/*" capture="environment">'
-        +   '</div>'
-        +   '<div class="field-block">'
-        +     '<button class="secondary" type="button" onclick="uploadCasePhoto(this,\'' + esc(item.table) + '\',\'' + esc(item.id) + '\')">Upload Photo</button>'
-        +   '</div>'
-        + '</div>';
+      function renderStats(list) {
+        let total = list.length;
+        let open = 0;
+        let recovery = 0;
+        let missed = 0;
 
-      if (!paths.length) {
-        html += '<div class="photo-empty">No photos on file yet.</div>';
+        list.forEach(function (item) {
+          if (item.status === 'Open') open += 1;
+          if (item.status === 'In Recovery') recovery += 1;
+          if (item.status === 'Missed Court' || item.status === 'Missed Payment') missed += 1;
+        });
+
+        document.getElementById('statTotal').textContent = 'Total: ' + total;
+        document.getElementById('statOpen').textContent = 'Open: ' + open;
+        document.getElementById('statRecovery').textContent = 'In Recovery: ' + recovery;
+        document.getElementById('statMissed').textContent = 'Missed: ' + missed;
+      }
+
+      function applyFiltersAndRender() {
+        const q = searchEl.value.toLowerCase().trim();
+        const tableFilter = filterTableEl.value;
+        const statusFilter = filterStatusEl.value;
+
+        const filtered = allCases.filter(function (item) {
+          const hay = [
+            item.name,
+            item.case_number,
+            item.court_date,
+            item.status,
+            item.county,
+            item.phone,
+            item.assigned_agent,
+            item.priority,
+            item.next_action,
+            item.admin_notes,
+            item.table
+          ].join(' ').toLowerCase();
+
+          const matchesSearch = !q || hay.includes(q);
+          const matchesTable = !tableFilter || item.table === tableFilter;
+          const matchesStatus = !statusFilter || item.status === statusFilter;
+
+          return matchesSearch && matchesTable && matchesStatus;
+        });
+
+        renderCases(filtered);
+        renderStats(filtered);
+      }
+
+      function getFieldInputHtml(item, def) {
+        const actualColumn = getActualColumn(item.raw, item.table, def.aliases);
+        const value = actualColumn ? item.raw[actualColumn] : getValueByAliases(item.raw, def.aliases);
+        const displayValue = value == null ? '' : value;
+        const inputClass = 'field-' + def.key;
+
+        if (def.type === 'textarea') {
+          return (
+            '<div class="field-block">' +
+              '<label>' + esc(def.label) + '</label>' +
+              '<textarea class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '">' + esc(displayValue) + '</textarea>' +
+            '</div>'
+          );
+        }
+
+        if (def.type === 'status') {
+          const options = STATUS_OPTIONS.map(function (status) {
+            return '<option value="' + esc(status) + '"' + (String(displayValue || 'Open') === status ? ' selected' : '') + '>' + esc(status) + '</option>';
+          }).join('');
+
+          return (
+            '<div class="field-block">' +
+              '<label>' + esc(def.label) + '</label>' +
+              '<select class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '">' + options + '</select>' +
+            '</div>'
+          );
+        }
+
+        if (def.type === 'boolean') {
+          return (
+            '<div class="field-block">' +
+              '<label>' + esc(def.label) + '</label>' +
+              '<select class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '">' +
+                '<option value="false"' + (!displayValue ? ' selected' : '') + '>No</option>' +
+                '<option value="true"' + (displayValue ? ' selected' : '') + '>Yes</option>' +
+              '</select>' +
+            '</div>'
+          );
+        }
+
+        const inputType = def.type === 'date' ? 'date' : 'text';
+        const normalizedValue = def.type === 'date' ? normalizeDateInput(displayValue) : formatDisplay(displayValue);
+
+        return (
+          '<div class="field-block">' +
+            '<label>' + esc(def.label) + '</label>' +
+            '<input class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '" type="' + esc(inputType) + '" value="' + esc(normalizedValue) + '">' +
+          '</div>'
+        );
+      }
+
+      function getReadonlyHtml(item, meta) {
+        const value = item[meta.key] || item.raw[meta.key] || '';
+        return (
+          '<div class="field-block">' +
+            '<label>' + esc(meta.label) + '</label>' +
+            '<input type="text" value="' + esc(formatDisplay(value)) + '" disabled>' +
+          '</div>'
+        );
+      }
+
+      function renderPhotoSection(item) {
+        const paths = extractPhotoPaths(item.raw);
+
+        let html = ''
+          + '<div class="divider"></div>'
+          + '<div class="section-title">Photos</div>'
+          + '<div class="photo-toolbar">'
+          +   '<div class="field-block">'
+          +     '<label>Upload Case Photo</label>'
+          +     '<input class="photo-input" type="file" accept="image/*" capture="environment">'
+          +   '</div>'
+          +   '<div class="field-block">'
+          +     '<button class="secondary btn-upload-photo" type="button">Upload Photo</button>'
+          +   '</div>'
+          + '</div>';
+
+        if (!paths.length) {
+          html += '<div class="photo-empty">No photos on file yet.</div>';
+          return html;
+        }
+
+        html += '<div class="photo-grid">';
+        paths.forEach(function (path) {
+          const publicUrl = getPublicPhotoUrl(path);
+          html += ''
+            + '<div class="photo-card">'
+            +   '<a href="' + esc(publicUrl) + '" target="_blank" rel="noopener noreferrer">'
+            +     '<img class="photo-thumb" src="' + esc(publicUrl) + '" alt="Case photo">'
+            +   '</a>'
+            +   '<div class="photo-meta">'
+            +     '<div class="photo-path">' + esc(path) + '</div>'
+            +     '<button class="danger btn-delete-photo" type="button" data-path="' + esc(path) + '">Delete Photo</button>'
+            +   '</div>'
+            + '</div>';
+        });
+        html += '</div>';
         return html;
       }
 
-      html += '<div class="photo-grid">';
-      paths.forEach(function(path) {
-        var publicUrl = getPublicPhotoUrl(path);
-        html += ''
-          + '<div class="photo-card">'
-          +   '<a href="' + esc(publicUrl) + '" target="_blank" rel="noopener noreferrer">'
-          +     '<img class="photo-thumb" src="' + esc(publicUrl) + '" alt="Case photo">'
-          +   '</a>'
-          +   '<div class="photo-meta">'
-          +     '<div class="photo-path">' + esc(path) + '</div>'
-          +     '<button class="danger" type="button" onclick="deleteCasePhoto(this,\'' + esc(item.table) + '\',\'' + esc(item.id) + '\',\'' + encodeURIComponent(path) + '\')">Delete Photo</button>'
-          +   '</div>'
-          + '</div>';
-      });
-      html += '</div>';
-      return html;
-    }
+      function renderCases(list) {
+        casesEl.innerHTML = '';
 
-    function normalizeCase(row, table) {
-      return {
-        id: row.id,
-        table: table,
-        raw: row,
-        name: getValueByAliases(row, ['defendant_name', 'name', 'full_name']) || '(No name)',
-        case_number: getValueByAliases(row, ['case_number', 'case_no', 'case_num', 'court_case_number', 'file_number']),
-        court_date: getValueByAliases(row, ['court_date', 'next_court_date', 'appearance_date']),
-        status: getValueByAliases(row, ['status']) || 'Open',
-        county: getValueByAliases(row, ['county']),
-        phone: getValueByAliases(row, ['phone', 'phone_number', 'defendant_phone', 'mobile']),
-        assigned_agent: getValueByAliases(row, ['assigned_agent', 'agent', 'agent_name']),
-        priority: getValueByAliases(row, ['priority']),
-        next_action: getValueByAliases(row, ['next_action', 'action_needed', 'follow_up']),
-        admin_notes: getValueByAliases(row, ['admin_notes', 'notes', 'internal_notes']),
-        watchlist: !!getValueByAliases(row, ['watchlist']),
-        photo_paths: extractPhotoPaths(row),
-        primary_photo_path: getValueByAliases(row, ['primary_photo_path', 'primary_photo', 'photo_path']),
-        created_at: row.created_at || '',
-        updated_at: row.updated_at || ''
-      };
-    }
-
-    async function loadCases() {
-      if (!client) {
-        setLoadMsg('Supabase is not ready.', 'bad');
-        return;
-      }
-
-      setLoadMsg('Loading cases...', 'muted');
-      casesEl.innerHTML = '';
-
-      try {
-        var bailRes = await client.from('bail_intakes').select('*').order('created_at', { ascending: false });
-        if (bailRes.error) {
-          setLoadMsg('Bail load failed: ' + bailRes.error.message, 'bad');
+        if (!list.length) {
+          setLoadMsg('No cases found.', 'muted');
           return;
         }
 
-        var recoveryRes = await client.from('recovery_requests').select('*').order('created_at', { ascending: false });
-        if (recoveryRes.error) {
-          setLoadMsg('Recovery load failed: ' + recoveryRes.error.message, 'bad');
-          return;
-        }
+        setLoadMsg('Loaded ' + list.length + ' case(s).', 'ok');
 
-        schemaByTable.bail_intakes = bailRes.data && bailRes.data[0] ? Object.keys(bailRes.data[0]) : (schemaByTable.bail_intakes || []);
-        schemaByTable.recovery_requests = recoveryRes.data && recoveryRes.data[0] ? Object.keys(recoveryRes.data[0]) : (schemaByTable.recovery_requests || []);
+        list.forEach(function (item) {
+          const isExpanded = !!expandedState[item.table + ':' + item.id];
+          const caseEl = document.createElement('div');
+          caseEl.className = 'case';
+          caseEl.dataset.id = item.id;
+          caseEl.dataset.table = item.table;
+          caseEl.dataset.name = item.name || '';
 
-        allCases = []
-          .concat((bailRes.data || []).map(function(r) { return normalizeCase(r, 'bail_intakes'); }))
-          .concat((recoveryRes.data || []).map(function(r) { return normalizeCase(r, 'recovery_requests'); }));
-
-        populateAddTableOptions();
-        applyFiltersAndRender();
-      } catch (e) {
-        setLoadMsg('Load crash: ' + e.message, 'bad');
-      }
-    }
-
-    function populateAddTableOptions() {
-      var select = document.getElementById('add-table');
-      var current = select.value || 'bail_intakes';
-      var options = ['bail_intakes', 'recovery_requests'];
-      select.innerHTML = options.map(function(table) {
-        return '<option value="' + esc(table) + '">' + esc(table) + '</option>';
-      }).join('');
-      select.value = current;
-    }
-
-    function renderStats(list) {
-      var total = list.length;
-      var open = 0;
-      var recovery = 0;
-      var missed = 0;
-
-      list.forEach(function(item) {
-        if (item.status === 'Open') open++;
-        if (item.status === 'In Recovery') recovery++;
-        if (item.status === 'Missed Court' || item.status === 'Missed Payment') missed++;
-      });
-
-      document.getElementById('statTotal').textContent = 'Total: ' + total;
-      document.getElementById('statOpen').textContent = 'Open: ' + open;
-      document.getElementById('statRecovery').textContent = 'In Recovery: ' + recovery;
-      document.getElementById('statMissed').textContent = 'Missed: ' + missed;
-    }
-
-    function applyFiltersAndRender() {
-      var q = searchEl.value.toLowerCase().trim();
-      var tableFilter = filterTableEl.value;
-      var statusFilter = filterStatusEl.value;
-
-      var filtered = allCases.filter(function(item) {
-        var hay = [
-          item.name,
-          item.case_number,
-          item.court_date,
-          item.status,
-          item.county,
-          item.phone,
-          item.assigned_agent,
-          item.priority,
-          item.next_action,
-          item.admin_notes,
-          item.table
-        ].join(' ').toLowerCase();
-
-        var matchesSearch = !q || hay.indexOf(q) !== -1;
-        var matchesTable = !tableFilter || item.table === tableFilter;
-        var matchesStatus = !statusFilter || item.status === statusFilter;
-
-        return matchesSearch && matchesTable && matchesStatus;
-      });
-
-      renderCases(filtered);
-      renderStats(filtered);
-    }
-
-    function getFieldInputHtml(item, def) {
-      var actualColumn = getActualColumn(item.raw, item.table, def.aliases);
-      var value = actualColumn ? item.raw[actualColumn] : getValueByAliases(item.raw, def.aliases);
-      var displayValue = value == null ? '' : value;
-      var inputClass = 'field-' + def.key;
-
-      if (def.type === 'textarea') {
-        return ''
-          + '<div class="field-block">'
-          +   '<label>' + esc(def.label) + '</label>'
-          +   '<textarea class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '">' + esc(displayValue) + '</textarea>'
-          + '</div>';
-      }
-
-      if (def.type === 'status') {
-        var options = STATUS_OPTIONS.map(function(status) {
-          return '<option' + (String(displayValue || 'Open') === status ? ' selected' : '') + '>' + esc(status) + '</option>';
-        }).join('');
-
-        return ''
-          + '<div class="field-block">'
-          +   '<label>' + esc(def.label) + '</label>'
-          +   '<select class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '">' + options + '</select>'
-          + '</div>';
-      }
-
-      if (def.type === 'boolean') {
-        return ''
-          + '<div class="field-block">'
-          +   '<label>' + esc(def.label) + '</label>'
-          +   '<select class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '">'
-          +     '<option value="false"' + (!displayValue ? ' selected' : '') + '>No</option>'
-          +     '<option value="true"' + (displayValue ? ' selected' : '') + '>Yes</option>'
-          +   '</select>'
-          + '</div>';
-      }
-
-      var inputType = def.type === 'date' ? 'date' : 'text';
-      var normalizedValue = def.type === 'date' ? normalizeDateInput(displayValue) : displayValue;
-
-      return ''
-        + '<div class="field-block">'
-        +   '<label>' + esc(def.label) + '</label>'
-        +   '<input class="' + esc(inputClass) + '" data-key="' + esc(def.key) + '" type="' + esc(inputType) + '" value="' + esc(normalizedValue) + '">'
-        + '</div>';
-    }
-
-    function getReadonlyHtml(item, meta) {
-      var value = item[meta.key] || item.raw[meta.key] || '';
-      return ''
-        + '<div class="field-block">'
-        +   '<label>' + esc(meta.label) + '</label>'
-        +   '<input type="text" value="' + esc(value) + '" disabled>'
-        + '</div>';
-    }
-
-    function renderCases(list) {
-      casesEl.innerHTML = '';
-
-      if (!list.length) {
-        setLoadMsg('No cases found.', 'muted');
-        return;
-      }
-
-      setLoadMsg('Loaded ' + list.length + ' case(s).', 'ok');
-
-      list.forEach(function(item) {
-        var isExpanded = !!expandedState[item.table + ':' + item.id];
-        var caseEl = document.createElement('div');
-        caseEl.className = 'case';
-        caseEl.setAttribute('data-id', item.id);
-        caseEl.setAttribute('data-table', item.table);
-
-        var detailHtml = '';
-        detailHtml += '<div class="section-title">Defendant</div><div class="grid-4">';
-        detailHtml += FIELD_DEFS.slice(0, 12).map(function(def) { return getFieldInputHtml(item, def); }).join('');
-        detailHtml += '</div>';
-
-        detailHtml += '<div class="divider"></div><div class="section-title">Bond + Case</div><div class="grid-4">';
-        detailHtml += FIELD_DEFS.slice(12, 21).map(function(def) { return getFieldInputHtml(item, def); }).join('');
-        detailHtml += '</div>';
-
-        detailHtml += '<div class="divider"></div><div class="section-title">Operations</div><div class="grid-4">';
-        detailHtml += FIELD_DEFS.slice(21).map(function(def) { return getFieldInputHtml(item, def); }).join('');
-        detailHtml += META_FIELDS.map(function(meta) { return getReadonlyHtml(item, meta); }).join('');
-        detailHtml += '</div>';
-
-        var extraKeys = Object.keys(item.raw).filter(function(key) {
-          if (['id'].indexOf(key) !== -1) return false;
-          if (FIELD_DEFS.some(function(def) { return def.aliases.indexOf(key) !== -1; })) return false;
-          if (META_FIELDS.some(function(meta) { return meta.key === key; })) return false;
-          return true;
-        });
-
-        if (extraKeys.length) {
-          detailHtml += '<div class="divider"></div><div class="section-title">Other Data On File</div><div class="grid-4">';
-          extraKeys.forEach(function(key) {
-            detailHtml += ''
-              + '<div class="field-block">'
-              +   '<label>' + esc(titleCaseKey(key)) + '</label>'
-              +   '<input class="field-extra" data-column="' + esc(key) + '" type="text" value="' + esc(item.raw[key]) + '">'
-              + '</div>';
-          });
+          let detailHtml = '';
+          detailHtml += '<div class="section-title">Defendant</div><div class="grid-4">';
+          detailHtml += FIELD_DEFS.slice(0, 12).map(function (def) { return getFieldInputHtml(item, def); }).join('');
           detailHtml += '</div>';
+
+          detailHtml += '<div class="divider"></div><div class="section-title">Bond + Case</div><div class="grid-4">';
+          detailHtml += FIELD_DEFS.slice(12, 21).map(function (def) { return getFieldInputHtml(item, def); }).join('');
+          detailHtml += '</div>';
+
+          detailHtml += '<div class="divider"></div><div class="section-title">Operations</div><div class="grid-4">';
+          detailHtml += FIELD_DEFS.slice(21).map(function (def) { return getFieldInputHtml(item, def); }).join('');
+          detailHtml += META_FIELDS.map(function (meta) { return getReadonlyHtml(item, meta); }).join('');
+          detailHtml += '</div>';
+
+          const extraKeys = Object.keys(item.raw).filter(function (key) {
+            if (key === 'id') return false;
+            if (FIELD_DEFS.some(function (def) { return def.aliases.includes(key); })) return false;
+            if (META_FIELDS.some(function (meta) { return meta.key === key; })) return false;
+            if (['photo_paths', 'primary_photo_path'].includes(key)) return false;
+            return true;
+          });
+
+          if (extraKeys.length) {
+            detailHtml += '<div class="divider"></div><div class="section-title">Other Data On File</div><div class="grid-4">';
+            extraKeys.forEach(function (key) {
+              detailHtml += ''
+                + '<div class="field-block">'
+                +   '<label>' + esc(titleCaseKey(key)) + '</label>'
+                +   '<input class="field-extra" data-column="' + esc(key) + '" type="text" value="' + esc(formatDisplay(item.raw[key])) + '">'
+                + '</div>';
+            });
+            detailHtml += '</div>';
+          }
+
+          detailHtml += renderPhotoSection(item);
+
+          caseEl.innerHTML = ''
+            + '<button class="case-header btn-toggle-case" type="button">'
+            +   '<div class="summary-main">'
+            +     '<strong>' + esc(item.name || '(No name)') + '</strong>'
+            +     '<span>Name</span>'
+            +   '</div>'
+            +   '<div class="summary-cell">'
+            +     '<strong>' + esc(item.court_date || '—') + '</strong>'
+            +     '<span>Court Date</span>'
+            +   '</div>'
+            +   '<div class="summary-cell">'
+            +     '<strong>' + esc(item.case_number || '—') + '</strong>'
+            +     '<span>Case Number</span>'
+            +   '</div>'
+            +   '<div class="summary-actions">'
+            +     '<span class="pill">' + esc(item.status || 'Open') + '</span>'
+            +     '<span class="pill">' + esc(item.table) + '</span>'
+            +   '</div>'
+            +   '<div class="caret">' + (isExpanded ? '&#9650;' : '&#9660;') + '</div>'
+            + '</button>'
+            + '<div class="case-body' + (isExpanded ? '' : ' hidden') + '">'
+            +   detailHtml
+            +   '<div class="form-actions">'
+            +     '<button class="btn-save-case" type="button">Save Changes</button>'
+            +     '<button class="secondary btn-collapse-case" type="button">Collapse</button>'
+            +     '<button class="danger btn-delete-case" type="button">Delete Defendant</button>'
+            +   '</div>'
+            +   '<div class="saveMsg muted">Waiting.</div>'
+            + '</div>';
+
+          casesEl.appendChild(caseEl);
+        });
+      }
+
+      function coerceValue(column, value, defType) {
+        if (defType === 'boolean') return value === 'true';
+        if (defType === 'date') return value || null;
+        if (isNumericField(column)) {
+          const trimmed = String(value || '').trim();
+          if (!trimmed) return null;
+          const num = Number(trimmed);
+          return Number.isFinite(num) ? num : null;
         }
-
-        detailHtml += renderPhotoSection(item);
-
-        caseEl.innerHTML = ''
-          + '<button class="case-header" onclick="toggleCaseBody(this)">'
-          +   '<div class="summary-main">'
-          +     '<strong>' + esc(item.name || '(No name)') + '</strong>'
-          +     '<span>Name</span>'
-          +   '</div>'
-          +   '<div class="summary-cell">'
-          +     '<strong>' + esc(item.court_date || '—') + '</strong>'
-          +     '<span>Court Date</span>'
-          +   '</div>'
-          +   '<div class="summary-cell">'
-          +     '<strong>' + esc(item.case_number || '—') + '</strong>'
-          +     '<span>Case Number</span>'
-          +   '</div>'
-          +   '<div class="summary-actions">'
-          +     '<span class="pill">' + esc(item.status || 'Open') + '</span>'
-          +     '<span class="pill">' + esc(item.table) + '</span>'
-          +   '</div>'
-          +   '<div class="caret">' + (isExpanded ? '&#9650;' : '&#9660;') + '</div>'
-          + '</button>'
-          + '<div class="case-body' + (isExpanded ? '' : ' hidden') + '">'
-          +   detailHtml
-          +   '<div class="form-actions">'
-          +     '<button onclick="saveCase(this,\'' + esc(item.table) + '\',\'' + esc(item.id) + '\')">Save Changes</button>'
-          +     '<button class="secondary" onclick="collapseCase(this)">Collapse</button>'
-          +     '<button class="danger" onclick="deleteCase(this,\'' + esc(item.table) + '\',\'' + esc(item.id) + '\',\'' + esc(item.name) + '\')">Delete Defendant</button>'
-          +   '</div>'
-          +   '<div class="saveMsg muted">Waiting.</div>'
-          + '</div>';
-
-        casesEl.appendChild(caseEl);
-      });
-    }
-
-    function collectPayloadFromCard(card, item, mode) {
-      var payload = {};
-      FIELD_DEFS.forEach(function(def) {
-        var element = card.querySelector('.field-' + def.key);
-        if (!element) return;
-
-        var actualColumn = getActualColumn(item ? item.raw : null, item ? item.table : document.getElementById('add-table').value, def.aliases);
-        if (!actualColumn && mode === 'insert') {
-          actualColumn = getActualColumn(null, document.getElementById('add-table').value, def.aliases) || def.aliases[0];
-        }
-        if (!actualColumn) return;
-
-        var rawValue = element.value;
-
-        if (def.type === 'boolean') {
-          payload[actualColumn] = rawValue === 'true';
-        } else if (def.type === 'date') {
-          payload[actualColumn] = rawValue || null;
-        } else {
-          payload[actualColumn] = rawValue;
-        }
-      });
-
-      card.querySelectorAll('.field-extra').forEach(function(el) {
-        payload[el.getAttribute('data-column')] = el.value;
-      });
-
-      return payload;
-    }
-
-    async function saveCase(button, table, id) {
-      var card = button.closest('.case');
-      var msg = card.querySelector('.saveMsg');
-      var item = allCases.find(function(c) { return String(c.id) === String(id) && c.table === table; });
-
-      if (!item) {
-        msg.textContent = 'Case not found in memory.';
-        msg.className = 'saveMsg bad';
-        return;
+        return value;
       }
 
-      var payload = collectPayloadFromCard(card, item, 'update');
+      function collectPayloadFromCard(card, item, mode) {
+        const payload = {};
+        FIELD_DEFS.forEach(function (def) {
+          const element = card.querySelector('.field-' + def.key);
+          if (!element) return;
 
-      msg.textContent = 'Saving...';
-      msg.className = 'saveMsg muted';
+          let actualColumn = getActualColumn(
+            item ? item.raw : null,
+            item ? item.table : document.getElementById('add-table').value,
+            def.aliases
+          );
 
-      try {
-        var result = await client.from(table).update(payload).eq('id', id);
-        if (result.error) {
-          msg.textContent = 'Save failed: ' + result.error.message;
-          msg.className = 'saveMsg bad';
-          return;
-        }
+          if (!actualColumn && mode === 'insert') {
+            actualColumn = def.aliases[0];
+          }
 
-        msg.textContent = 'Saved.';
-        msg.className = 'saveMsg ok';
-        expandedState[table + ':' + id] = true;
-        await loadCases();
-      } catch (e) {
-        msg.textContent = 'Save crash: ' + e.message;
-        msg.className = 'saveMsg bad';
-      }
-    }
-
-    async function deleteCase(button, table, id, name) {
-      var card = button.closest('.case');
-      var msg = card.querySelector('.saveMsg');
-      var okDelete = window.confirm('Delete defendant "' + name + '" from ' + table + '? This cannot be undone.');
-      if (!okDelete) return;
-
-      msg.textContent = 'Deleting...';
-      msg.className = 'saveMsg muted';
-
-      try {
-        var result = await client.from(table).delete().eq('id', id);
-        if (result.error) {
-          msg.textContent = 'Delete failed: ' + result.error.message;
-          msg.className = 'saveMsg bad';
-          return;
-        }
-
-        delete expandedState[table + ':' + id];
-        await loadCases();
-      } catch (e) {
-        msg.textContent = 'Delete crash: ' + e.message;
-        msg.className = 'saveMsg bad';
-      }
-    }
-
-
-    async function uploadCasePhoto(button, table, id) {
-      var card = button.closest('.case');
-      var msg = card.querySelector('.saveMsg');
-      var item = allCases.find(function(c) { return String(c.id) === String(id) && c.table === table; });
-      var input = card.querySelector('.photo-input');
-
-      if (!item) {
-        msg.textContent = 'Case not found in memory.';
-        msg.className = 'saveMsg bad';
-        return;
-      }
-
-      if (!input || !input.files || !input.files[0]) {
-        msg.textContent = 'Choose a photo first.';
-        msg.className = 'saveMsg bad';
-        return;
-      }
-
-      var file = input.files[0];
-      var ext = '';
-      if (file.name && file.name.indexOf('.') !== -1) {
-        ext = '.' + file.name.split('.').pop().toLowerCase();
-      }
-      var fileName = Date.now() + '-' + safeFileName((item.name || 'case') + ext);
-      var path = table + '/' + id + '/' + fileName;
-
-      msg.textContent = 'Uploading photo...';
-      msg.className = 'saveMsg muted';
-
-      try {
-        var uploadRes = await client.storage.from(PHOTO_BUCKET).upload(path, file, {
-          cacheControl: '3600',
-          upsert: false
+          if (!actualColumn) return;
+          payload[actualColumn] = coerceValue(actualColumn, element.value, def.type);
         });
 
-        if (uploadRes.error) {
-          msg.textContent = 'Upload failed: ' + uploadRes.error.message;
-          msg.className = 'saveMsg bad';
-          return;
-        }
+        card.querySelectorAll('.field-extra').forEach(function (el) {
+          const column = el.getAttribute('data-column');
+          const value = el.value;
+          if (!column) return;
 
-        var existingPaths = extractPhotoPaths(item.raw);
-        var newPaths = existingPaths.concat([path]);
-        var updateRes = await client.from(table).update({
-          photo_paths: newPaths,
-          primary_photo_path: newPaths[0] || null
-        }).eq('id', id);
+          if (column === 'photo_paths') {
+            try {
+              payload[column] = JSON.parse(value || '[]');
+            } catch (error) {
+              payload[column] = value;
+            }
+            return;
+          }
 
-        if (updateRes.error) {
-          msg.textContent = 'Photo saved to storage, but row update failed: ' + updateRes.error.message;
-          msg.className = 'saveMsg bad';
-          return;
-        }
+          payload[column] = isNumericField(column) ? (value === '' ? null : Number(value)) : value;
+        });
 
-        msg.textContent = 'Photo uploaded.';
-        msg.className = 'saveMsg ok';
-        expandedState[table + ':' + id] = true;
-        await loadCases();
-      } catch (e) {
-        msg.textContent = 'Photo upload crash: ' + e.message;
-        msg.className = 'saveMsg bad';
-      }
-    }
-
-    async function deleteCasePhoto(button, table, id, encodedPath) {
-      var card = button.closest('.case');
-      var msg = card.querySelector('.saveMsg');
-      var item = allCases.find(function(c) { return String(c.id) === String(id) && c.table === table; });
-      var path = decodeURIComponent(encodedPath || '');
-
-      if (!item || !path) {
-        msg.textContent = 'Photo not found.';
-        msg.className = 'saveMsg bad';
-        return;
+        return payload;
       }
 
-      var okDelete = window.confirm('Delete this photo? This cannot be undone.');
-      if (!okDelete) return;
+      async function saveCase(caseEl) {
+        const table = caseEl.dataset.table;
+        const id = caseEl.dataset.id;
+        const msg = caseEl.querySelector('.saveMsg');
+        const item = allCases.find(function (c) { return String(c.id) === String(id) && c.table === table; });
 
-      msg.textContent = 'Deleting photo...';
-      msg.className = 'saveMsg muted';
-
-      try {
-        var existingPaths = extractPhotoPaths(item.raw);
-        var newPaths = existingPaths.filter(function(p) { return p !== path; });
-
-        var removeRes = await client.storage.from(PHOTO_BUCKET).remove([path]);
-        if (removeRes.error) {
-          msg.textContent = 'Storage delete failed: ' + removeRes.error.message;
+        if (!item) {
+          msg.textContent = 'Case not found in memory.';
           msg.className = 'saveMsg bad';
           return;
         }
 
-        var updateRes = await client.from(table).update({
-          photo_paths: newPaths,
-          primary_photo_path: newPaths[0] || null
-        }).eq('id', id);
+        const payload = collectPayloadFromCard(caseEl, item, 'update');
 
-        if (updateRes.error) {
-          msg.textContent = 'Photo removed from storage, but row update failed: ' + updateRes.error.message;
+        msg.textContent = 'Saving...';
+        msg.className = 'saveMsg muted';
+
+        try {
+          const result = await client.from(table).update(payload).eq('id', id);
+          if (result.error) {
+            msg.textContent = 'Save failed: ' + result.error.message;
+            msg.className = 'saveMsg bad';
+            return;
+          }
+
+          msg.textContent = 'Saved.';
+          msg.className = 'saveMsg ok';
+          expandedState[table + ':' + id] = true;
+          await loadCases();
+        } catch (error) {
+          msg.textContent = 'Save crash: ' + error.message;
           msg.className = 'saveMsg bad';
-          return;
         }
-
-        msg.textContent = 'Photo deleted.';
-        msg.className = 'saveMsg ok';
-        expandedState[table + ':' + id] = true;
-        await loadCases();
-      } catch (e) {
-        msg.textContent = 'Delete photo crash: ' + e.message;
-        msg.className = 'saveMsg bad';
       }
-    }
 
-    function resetAddForm() {
-      document.querySelectorAll('#addCard input, #addCard textarea').forEach(function(el) {
-        if (el.type === 'date') {
+      async function deleteCase(caseEl) {
+        const table = caseEl.dataset.table;
+        const id = caseEl.dataset.id;
+        const name = caseEl.dataset.name || '(No name)';
+        const msg = caseEl.querySelector('.saveMsg');
+
+        if (!window.confirm('Delete defendant "' + name + '" from ' + table + '? This cannot be undone.')) {
+          return;
+        }
+
+        msg.textContent = 'Deleting...';
+        msg.className = 'saveMsg muted';
+
+        try {
+          const result = await client.from(table).delete().eq('id', id);
+          if (result.error) {
+            msg.textContent = 'Delete failed: ' + result.error.message;
+            msg.className = 'saveMsg bad';
+            return;
+          }
+
+          delete expandedState[table + ':' + id];
+          await loadCases();
+        } catch (error) {
+          msg.textContent = 'Delete crash: ' + error.message;
+          msg.className = 'saveMsg bad';
+        }
+      }
+
+      async function uploadCasePhoto(caseEl) {
+        const table = caseEl.dataset.table;
+        const id = caseEl.dataset.id;
+        const msg = caseEl.querySelector('.saveMsg');
+        const item = allCases.find(function (c) { return String(c.id) === String(id) && c.table === table; });
+        const input = caseEl.querySelector('.photo-input');
+
+        if (!item) {
+          msg.textContent = 'Case not found in memory.';
+          msg.className = 'saveMsg bad';
+          return;
+        }
+
+        if (!input || !input.files || !input.files[0]) {
+          msg.textContent = 'Choose a photo first.';
+          msg.className = 'saveMsg bad';
+          return;
+        }
+
+        const file = input.files[0];
+        const ext = file.name && file.name.includes('.') ? '.' + file.name.split('.').pop().toLowerCase() : '';
+        const fileName = Date.now() + '-' + safeFileName((item.name || 'case') + ext);
+        const path = table + '/' + id + '/' + fileName;
+
+        msg.textContent = 'Uploading photo...';
+        msg.className = 'saveMsg muted';
+
+        try {
+          const uploadRes = await client.storage.from(PHOTO_BUCKET).upload(path, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+          if (uploadRes.error) {
+            msg.textContent = 'Upload failed: ' + uploadRes.error.message;
+            msg.className = 'saveMsg bad';
+            return;
+          }
+
+          const existingPaths = extractPhotoPaths(item.raw);
+          const newPaths = existingPaths.concat([path]);
+          const updateRes = await client.from(table).update({
+            photo_paths: newPaths,
+            primary_photo_path: newPaths[0] || null
+          }).eq('id', id);
+
+          if (updateRes.error) {
+            msg.textContent = 'Photo saved to storage, but row update failed: ' + updateRes.error.message;
+            msg.className = 'saveMsg bad';
+            return;
+          }
+
+          msg.textContent = 'Photo uploaded.';
+          msg.className = 'saveMsg ok';
+          expandedState[table + ':' + id] = true;
+          await loadCases();
+        } catch (error) {
+          msg.textContent = 'Photo upload crash: ' + error.message;
+          msg.className = 'saveMsg bad';
+        }
+      }
+
+      async function deleteCasePhoto(caseEl, path) {
+        const table = caseEl.dataset.table;
+        const id = caseEl.dataset.id;
+        const msg = caseEl.querySelector('.saveMsg');
+        const item = allCases.find(function (c) { return String(c.id) === String(id) && c.table === table; });
+
+        if (!item || !path) {
+          msg.textContent = 'Photo not found.';
+          msg.className = 'saveMsg bad';
+          return;
+        }
+
+        if (!window.confirm('Delete this photo? This cannot be undone.')) {
+          return;
+        }
+
+        msg.textContent = 'Deleting photo...';
+        msg.className = 'saveMsg muted';
+
+        try {
+          const existingPaths = extractPhotoPaths(item.raw);
+          const newPaths = existingPaths.filter(function (p) { return p !== path; });
+
+          const removeRes = await client.storage.from(PHOTO_BUCKET).remove([path]);
+          if (removeRes.error) {
+            msg.textContent = 'Storage delete failed: ' + removeRes.error.message;
+            msg.className = 'saveMsg bad';
+            return;
+          }
+
+          const updateRes = await client.from(table).update({
+            photo_paths: newPaths,
+            primary_photo_path: newPaths[0] || null
+          }).eq('id', id);
+
+          if (updateRes.error) {
+            msg.textContent = 'Photo removed from storage, but row update failed: ' + updateRes.error.message;
+            msg.className = 'saveMsg bad';
+            return;
+          }
+
+          msg.textContent = 'Photo deleted.';
+          msg.className = 'saveMsg ok';
+          expandedState[table + ':' + id] = true;
+          await loadCases();
+        } catch (error) {
+          msg.textContent = 'Delete photo crash: ' + error.message;
+          msg.className = 'saveMsg bad';
+        }
+      }
+
+      function resetAddForm() {
+        document.querySelectorAll('#addCard input, #addCard textarea').forEach(function (el) {
           el.value = '';
-        } else {
-          el.value = '';
-        }
-      });
-      document.querySelectorAll('#addCard select').forEach(function(el) {
-        if (el.id === 'add-table') {
-          el.value = el.value || 'bail_intakes';
-        } else if (el.id === 'add-status') {
-          el.value = 'Open';
-        } else if (el.id === 'add-watchlist') {
-          el.value = 'false';
-        } else {
-          el.selectedIndex = 0;
-        }
-      });
-      setAddMsg('Waiting.', 'muted');
-    }
+        });
 
-    function buildAddPayload(table) {
-      var payload = {};
-      var fakeItem = { raw: {}, table: table };
+        document.querySelectorAll('#addCard select').forEach(function (el) {
+          if (el.id === 'add-table') el.value = 'bail_intakes';
+          else if (el.id === 'add-status') el.value = 'Open';
+          else if (el.id === 'add-watchlist') el.value = 'false';
+          else el.selectedIndex = 0;
+        });
 
-      [
-        'name','dob','case_number','court_date','charges','address','phone','race','sex','height','weight',
-        'cosigner_name','cosigner_phone','cosigner_address','cosigner_relationship','status','bond_amount',
-        'premium_amount','county_jail','prior_charges','county','assigned_agent','priority','next_action',
-        'watchlist','employer','vehicle','admin_notes'
-      ].forEach(function(key) {
-        var def = FIELD_DEFS.find(function(f) { return f.key === key; });
-        if (!def) return;
-        var element = document.querySelector('[data-field="' + key + '"]');
-        if (!element) return;
-
-        var actualColumn = getActualColumn(null, table, def.aliases) || def.aliases[0];
-        var val = element.value;
-
-        if (def.type === 'boolean') {
-          payload[actualColumn] = val === 'true';
-        } else if (def.type === 'date') {
-          payload[actualColumn] = val || null;
-        } else {
-          payload[actualColumn] = val;
-        }
-      });
-
-      return payload;
-    }
-
-    async function createCase() {
-      var table = document.getElementById('add-table').value || 'bail_intakes';
-      var payload = buildAddPayload(table);
-
-      if (!payload.defendant_name && !payload.name && !payload.full_name) {
-        setAddMsg('Name is required.', 'bad');
-        return;
+        setAddMsg('Waiting.', 'muted');
       }
 
-      setAddMsg('Creating...', 'muted');
+      function buildAddPayload(table) {
+        const payload = {};
+        document.querySelectorAll('#addCard [data-field]').forEach(function (el) {
+          const key = el.getAttribute('data-field');
+          const def = FIELD_DEFS.find(function (f) { return f.key === key; });
+          if (!def) return;
 
-      try {
-        var result = await client.from(table).insert(payload);
-        if (result.error) {
-          setAddMsg('Create failed: ' + result.error.message, 'bad');
+          const actualColumn = getActualColumn(null, table, def.aliases) || def.aliases[0];
+          payload[actualColumn] = coerceValue(actualColumn, el.value, def.type);
+        });
+
+        payload.photo_paths = [];
+        if (!('primary_photo_path' in payload)) payload.primary_photo_path = null;
+        return payload;
+      }
+
+      async function createCase() {
+        const table = document.getElementById('add-table').value || 'bail_intakes';
+        const payload = buildAddPayload(table);
+
+        const caseName = (payload.name || payload.defendant_name || '').toString().trim();
+        if (!caseName) {
+          setAddMsg('Name is required.', 'bad');
           return;
         }
 
-        setAddMsg('Defendant created.', 'ok');
-        resetAddForm();
-        await loadCases();
-      } catch (e) {
-        setAddMsg('Create crash: ' + e.message, 'bad');
+        setAddMsg('Creating...', 'muted');
+
+        try {
+          const result = await client.from(table).insert(payload);
+          if (result.error) {
+            setAddMsg('Create failed: ' + result.error.message, 'bad');
+            return;
+          }
+
+          resetAddForm();
+          setAddMsg('Defendant created.', 'ok');
+          await loadCases();
+        } catch (error) {
+          setAddMsg('Create crash: ' + error.message, 'bad');
+        }
       }
-    }
 
-    function toggleAddForm() {
-      addCard.classList.toggle('hidden');
-    }
+      function toggleAddForm() {
+        addCard.classList.toggle('hidden');
+      }
 
-    function toggleCaseBody(button) {
-      var caseEl = button.closest('.case');
-      var body = caseEl.querySelector('.case-body');
-      var table = caseEl.getAttribute('data-table');
-      var id = caseEl.getAttribute('data-id');
-      var caret = caseEl.querySelector('.caret');
+      function toggleCaseBody(caseEl) {
+        const body = caseEl.querySelector('.case-body');
+        const caret = caseEl.querySelector('.caret');
+        const key = caseEl.dataset.table + ':' + caseEl.dataset.id;
 
-      body.classList.toggle('hidden');
-      var expanded = !body.classList.contains('hidden');
-      expandedState[table + ':' + id] = expanded;
-      caret.innerHTML = expanded ? '&#9650;' : '&#9660;';
-    }
+        body.classList.toggle('hidden');
+        const expanded = !body.classList.contains('hidden');
+        expandedState[key] = expanded;
+        caret.innerHTML = expanded ? '&#9650;' : '&#9660;';
+      }
 
-    function collapseCase(button) {
-      var caseEl = button.closest('.case');
-      var body = caseEl.querySelector('.case-body');
-      var table = caseEl.getAttribute('data-table');
-      var id = caseEl.getAttribute('data-id');
-      var caret = caseEl.querySelector('.caret');
+      function collapseCase(caseEl) {
+        const body = caseEl.querySelector('.case-body');
+        const caret = caseEl.querySelector('.caret');
+        const key = caseEl.dataset.table + ':' + caseEl.dataset.id;
 
-      body.classList.add('hidden');
-      expandedState[table + ':' + id] = false;
-      caret.innerHTML = '&#9660;';
-      caseEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+        body.classList.add('hidden');
+        expandedState[key] = false;
+        caret.innerHTML = '&#9660;';
+        caseEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
 
-    function clearFilters() {
-      searchEl.value = '';
-      filterTableEl.value = '';
-      filterStatusEl.value = '';
-      applyFiltersAndRender();
-    }
+      function clearFilters() {
+        searchEl.value = '';
+        filterTableEl.value = '';
+        filterStatusEl.value = '';
+        applyFiltersAndRender();
+      }
 
-    searchEl.addEventListener('input', applyFiltersAndRender);
-    filterTableEl.addEventListener('change', applyFiltersAndRender);
-    filterStatusEl.addEventListener('change', applyFiltersAndRender);
+      document.getElementById('btnLogin').addEventListener('click', doLogin);
+      document.getElementById('btnCheckSessionTop').addEventListener('click', checkSession);
+      document.getElementById('btnCheckSessionLogin').addEventListener('click', checkSession);
+      document.getElementById('btnLogoutTop').addEventListener('click', doLogout);
+      document.getElementById('btnLogoutLogin').addEventListener('click', doLogout);
+      document.getElementById('btnToggleAddForm').addEventListener('click', toggleAddForm);
+      document.getElementById('btnCloseAddForm').addEventListener('click', toggleAddForm);
+      document.getElementById('btnRefreshCases').addEventListener('click', loadCases);
+      document.getElementById('btnClearFilters').addEventListener('click', clearFilters);
+      document.getElementById('btnCreateCase').addEventListener('click', createCase);
+      document.getElementById('btnResetAddForm').addEventListener('click', resetAddForm);
 
-    window.doLogin = doLogin;
-    window.checkSession = checkSession;
-    window.doLogout = doLogout;
-    window.loadCases = loadCases;
-    window.saveCase = saveCase;
-    window.deleteCase = deleteCase;
-    window.uploadCasePhoto = uploadCasePhoto;
-    window.deleteCasePhoto = deleteCasePhoto;
-    window.toggleAddForm = toggleAddForm;
-    window.toggleCaseBody = toggleCaseBody;
-    window.collapseCase = collapseCase;
-    window.clearFilters = clearFilters;
-    window.createCase = createCase;
-    window.resetAddForm = resetAddForm;
+      searchEl.addEventListener('input', applyFiltersAndRender);
+      filterTableEl.addEventListener('change', applyFiltersAndRender);
+      filterStatusEl.addEventListener('change', applyFiltersAndRender);
 
-    if (initSupabase()) {
-      checkSession();
-    }
+      document.getElementById('password').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') doLogin();
+      });
+
+      casesEl.addEventListener('click', function (event) {
+        const header = event.target.closest('.btn-toggle-case');
+        if (header) {
+          toggleCaseBody(header.closest('.case'));
+          return;
+        }
+
+        const saveBtn = event.target.closest('.btn-save-case');
+        if (saveBtn) {
+          saveCase(saveBtn.closest('.case'));
+          return;
+        }
+
+        const collapseBtn = event.target.closest('.btn-collapse-case');
+        if (collapseBtn) {
+          collapseCase(collapseBtn.closest('.case'));
+          return;
+        }
+
+        const deleteBtn = event.target.closest('.btn-delete-case');
+        if (deleteBtn) {
+          deleteCase(deleteBtn.closest('.case'));
+          return;
+        }
+
+        const uploadBtn = event.target.closest('.btn-upload-photo');
+        if (uploadBtn) {
+          uploadCasePhoto(uploadBtn.closest('.case'));
+          return;
+        }
+
+        const deletePhotoBtn = event.target.closest('.btn-delete-photo');
+        if (deletePhotoBtn) {
+          deleteCasePhoto(deletePhotoBtn.closest('.case'), deletePhotoBtn.getAttribute('data-path') || '');
+        }
+      });
+
+      if (initSupabase()) {
+        checkSession();
+      }
+    })();
   </script>
 </body>
 </html>
